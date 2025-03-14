@@ -2,6 +2,7 @@ name: conch_extract_features
 repo:
   name: CONCH
   url: "https://github.com/mahmoodlab/CONCH"
+  commit: 171f2be
   env:
     HF_TOKEN: "${env:HF_TOKEN}"  # required for downloading models
 papers: [lu2024conch]

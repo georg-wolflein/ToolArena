@@ -1,0 +1,43 @@
+[project]
+name = "toolarena"
+version = "0.1.0"
+authors = [
+    { name = "Georg Wölflein", email = "georg@woelflein.de" },
+]
+description = "Benchmark for LLM tool creation"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "docker>=7.1.0",
+    "fastapi>=0.115.11",
+    "httpx>=0.28.1",
+    "loguru>=0.7.3",
+    "pyyaml>=6.0.2",
+    "tenacity>=9.0.0",
+    "uvicorn>=0.34.0",
+]
+
+
+[tool.ruff]
+src = ["davinci"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I001"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[dependency-groups]
+dev = [
+    "ipykernel>=6.29.5",
+    "types-docker>=7.1.0.20241229",
+    "types-pyyaml>=6.0.12.20241230",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]  # Ignore `F401` (import violations) in all `__init__.py` files
+"*.py" = ["E501"]  # Ignore `E501` (line too long) in all files
+"*.ipynb" = ["E501"]  # Ignore `E501` (line too long) in all notebooks
