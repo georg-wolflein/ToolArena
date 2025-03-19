@@ -1,4 +1,5 @@
-FROM toolarena-runtime:latest
+FROM ghcr.io/georg-wolflein/toolarena-runtime:latest
+# FROM toolarena-runtime:latest
 
 ENV HOST=0.0.0.0
 ENV PORT=8000

@@ -21,7 +21,7 @@ def join_paths(parent: os.PathLike | str, *children: os.PathLike | str) -> Path:
 def chown_dir_using_docker(
     dir: os.PathLike | str, uid: int = os.getuid(), gid: int = os.getgid()
 ) -> None:
-    import docker  # type: ignore
+    import docker
 
     client = docker.from_env()
     logger.debug(f"Chowning directory {dir} to {uid}:{gid} using docker")

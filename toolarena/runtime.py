@@ -1,19 +1,21 @@
 """This is the client that communicates with the tool runtime running inside a Docker container."""
 
 import os
+import random
 import shutil
 from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Self, Sequence
+from typing import Final, Self, Sequence
 
 import docker
+import httpx
 import tenacity
+from docker.errors import APIError as DockerAPIError
 from docker.errors import NotFound as DockerNotFoundError
 from docker.models.containers import Container
 from docker.models.images import Image
 from docker.types import DeviceRequest, Mount
-from httpx import AsyncClient, HTTPError
 from loguru import logger
 
 from toolarena.types import ArgumentType, RunToolResponse
@@ -22,36 +24,40 @@ from toolarena.utils import ROOT_DIR, join_paths, rmdir
 type MountMapping = Mapping[str, str]  # host -> container
 
 
+TOOL_DOCKERFILE: Final[Path] = ROOT_DIR / "docker" / "tool.Dockerfile"
+DEFAULT_TOOL_IMAGE_NAME: Final[str] = "toolarena-tool"
+
+
 @dataclass(frozen=True, kw_only=True)
 class HTTPToolClient:
     host: str
     port: int
 
-    http_client: AsyncClient = AsyncClient(timeout=None)
+    http_client = httpx.Client(timeout=None)
 
     @property
     def url(self) -> str:
         return f"http://{self.host}:{self.port}"
 
-    async def run(self, **kwargs: ArgumentType) -> RunToolResponse:
-        response = await self.http_client.post(f"{self.url}/run", json=kwargs)
+    def run(self, **kwargs: ArgumentType) -> RunToolResponse:
+        response = self.http_client.post(f"{self.url}/run", json=kwargs)
         return RunToolResponse.model_validate_json(response.text)
 
-    async def is_alive(self) -> bool:
+    def is_alive(self) -> bool:
         try:
-            response = await self.http_client.get(f"{self.url}/alive")
+            response = self.http_client.get(f"{self.url}/alive")
             return (
                 response.status_code == 200
                 and response.json().get("status", None) == "ok"
             )
-        except HTTPError:
+        except httpx.HTTPError:
             return False
 
-    async def wait_for_alive(self, timeout: float | None = 10.0) -> None:
+    def wait_for_alive(self, timeout: float | None = 10.0) -> None:
         if timeout is None:
             timeout = float("inf")
 
-        if not await tenacity.retry(
+        if not tenacity.retry(
             retry=tenacity.retry_if_result(False.__eq__),
             stop=tenacity.stop_after_delay(timeout),
             wait=tenacity.wait_fixed(1),
@@ -59,12 +65,6 @@ class HTTPToolClient:
             raise RuntimeError(
                 f"Runtime client did not become ready after {timeout} seconds"
             )
-
-
-RUNTIME_IMAGE = "toolarena-runtime"
-RUNTIME_BUILD_CONTEXT = ROOT_DIR
-RUNTIME_DOCKERFILE = RUNTIME_BUILD_CONTEXT / "docker" / "runtime.Dockerfile"
-TOOL_DOCKERFILE = RUNTIME_BUILD_CONTEXT / "docker" / "tool.Dockerfile"
 
 
 def get_docker() -> docker.DockerClient:
@@ -129,11 +129,11 @@ class Mounts:
 
 
 def build_image(
-    repository: str = RUNTIME_IMAGE,
+    repository: str,
     *,
     tag: str,
-    context: Path | str = RUNTIME_BUILD_CONTEXT,
-    dockerfile: Path | str = RUNTIME_DOCKERFILE,
+    context: Path | str,
+    dockerfile: Path | str = TOOL_DOCKERFILE,
 ) -> Image:
     """Build the image from docker/runtime.Dockerfile using BuildKit."""
     logger.debug(f"Building image {repository}:{tag} using Docker BuildKit")
@@ -215,11 +215,12 @@ class DockerRuntimeClient(HTTPToolClient):
     def create(
         cls,
         name: str,
-        port: int = int(os.getenv("TOOLARENA_RUNTIME_PORT", "8000")),
+        build_context: Path | str,
+        image: str = DEFAULT_TOOL_IMAGE_NAME,
+        tag: str = "latest",
+        port: int | None = None,
         reuse_existing: bool = True,
         build: bool = False,
-        image: str = RUNTIME_IMAGE,
-        tag: str = "latest",
         timeout: float | None = 10.0,  # max wait time for the runtime to become ready
         mounts: Mounts | None = None,
         gpus: Sequence[str] | None = None,
@@ -233,8 +234,8 @@ class DockerRuntimeClient(HTTPToolClient):
             container = client.containers.get(name)
             logger.info(f"Found existing container {name}")
             if reuse_existing and mounts is None:
-                for tag in container.image.tags:  # type: ignore[union-attr]
-                    container_image, container_tag = tag.split(":")
+                for contain_image_tag in container.image.tags:
+                    container_image, container_tag = contain_image_tag.split(":")
                     if container_image == image and container_tag == tag:
                         return cls.from_container(container)
             container.remove(force=True)
@@ -247,14 +248,34 @@ class DockerRuntimeClient(HTTPToolClient):
                 raise RuntimeError(
                     f"Image {image}:{tag} not found and build is not allowed"
                 )
-            build_image(image, tag=tag)
+            build_image(image, tag=tag, context=build_context)
 
-        client = cls.from_container(
-            cls._start_container(
-                image, name, port=port, tag=tag, mounts=mounts, gpus=gpus, env=env
-            ),
-            port=port,
-        )
+        def _create_client(*, port: int) -> Self:
+            return cls.from_container(
+                cls._start_container(
+                    image, name, port=port, tag=tag, mounts=mounts, gpus=gpus, env=env
+                ),
+                port=port,
+            )
+
+        if port is None:
+            # Retry until we find an available port
+            def _update_port(retry_state: tenacity.RetryCallState) -> None:
+                port = random.randint(9000, 9999)
+                logger.debug(f"Trying to start container on port {port}")
+                retry_state.kwargs["port"] = port
+
+            _create_client = tenacity.retry(
+                retry=(
+                    tenacity.retry_if_exception_type(DockerAPIError)
+                    & tenacity.retry_if_exception_message(
+                        match="port is already allocated"
+                    )
+                ),
+                before=_update_port,
+            )(_create_client)
+
+        client = _create_client(port=port)
         client.wait_for_alive(timeout=timeout)
         return client
 

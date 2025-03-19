@@ -1,7 +1,6 @@
 # ToolArena
 
 ```bash
-docker build -t toolarena-runtime -f docker/runtime.Dockerfile .
 docker build -t toolarena-tool/conch_extract_features -f docker/tool.Dockerfile tasks/conch_extract_features
 docker run --rm -p 8012:8000 -v /mnt/bulk-uranus/gwoelflein/toolmaker/ToolArena/tasks/conch_extract_features/data:/data --env-file .env toolarena-tool/conch_extract_features:latest
 ```
