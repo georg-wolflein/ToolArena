@@ -1,10 +1,7 @@
 set -e
 
-REPO_URL=https://github.com/mahmoodlab/CONCH
-COMMIT=171f2be
-
-git clone $REPO_URL /workspace/CONCH
-cd /workspace/CONCH && git checkout $COMMIT
+git clone https://github.com/mahmoodlab/CONCH /workspace/CONCH
+cd /workspace/CONCH && git checkout 171f2be
 
 pip install -e /workspace/CONCH
 pip install huggingface_hub[cli] torch Pillow

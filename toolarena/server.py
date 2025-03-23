@@ -9,7 +9,7 @@ from fastapi import FastAPI
 from loguru import logger
 
 from toolarena.definition import TaskDefinition
-from toolarena.types import RunToolResponse
+from toolarena.types import ToolRunResult
 
 RUNTIME_DIR = Path(os.getenv("TOOLARENA_RUNTIME_DIR", "/toolarena_runtime"))
 TOOLARENA_DIR = Path(os.getenv("TOOLARENA_DIR", "/toolarena"))
@@ -32,7 +32,7 @@ async def alive():
     return {"status": "ok"}
 
 
-async def run(args: task_definition.args_to_pydantic()) -> RunToolResponse:  # type: ignore
+async def run(args: task_definition.args_to_pydantic()) -> ToolRunResult:  # type: ignore
     function_name = task_definition.name
     logger.info(f"Running {function_name} with args: {args}")
     id = uuid4()
@@ -64,7 +64,7 @@ async def run(args: task_definition.args_to_pydantic()) -> RunToolResponse:  # t
         start_new_session=True,  # this is to make sure an error is thrown if the command attempts to read from stdin
     )
     return_code = await process.wait()
-    response = RunToolResponse(
+    response = ToolRunResult(
         return_code=return_code, result=json.load(open(output_path, "r"))["result"]
     )
     for file in (info_path, output_path):

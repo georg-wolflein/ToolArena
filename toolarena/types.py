@@ -16,6 +16,6 @@ argument_type_map: Mapping[ArgumentTypeName, type] = {
 }
 
 
-class RunToolResponse(BaseModel):
+class ToolRunResult(BaseModel):
     return_code: int
     result: Any

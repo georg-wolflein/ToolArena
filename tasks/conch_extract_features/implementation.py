@@ -13,10 +13,11 @@ def conch_extract_features(
           'features': list  # The feature vector extracted from the input image, as a list of floats
         }
     """
-    import torch
-    from PIL import Image
-    from conch.open_clip_custom.factory import create_model_from_pretrained
     import os
+
+    import torch
+    from conch.open_clip_custom.factory import create_model_from_pretrained
+    from PIL import Image
 
     hf_token = os.environ.get("HF_TOKEN")
     model, preprocess = create_model_from_pretrained(

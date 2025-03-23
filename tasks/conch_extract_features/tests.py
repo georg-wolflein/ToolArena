@@ -2,10 +2,9 @@ from pathlib import Path
 
 import numpy as np
 import pytest
-from davinci.run import ToolRunResult
 from pytest_lazy_fixtures import lf
-
 from tests.utils import TESTS_DATA_DIR, initialize, parametrize_invocation
+from toolarena.types import ToolRunResult
 
 initialize()
 

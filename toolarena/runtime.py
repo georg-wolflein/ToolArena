@@ -18,7 +18,7 @@ from docker.models.images import Image
 from docker.types import DeviceRequest, Mount
 from loguru import logger
 
-from toolarena.types import ArgumentType, RunToolResponse
+from toolarena.types import ArgumentType, ToolRunResult
 from toolarena.utils import ROOT_DIR, join_paths, rmdir
 
 type MountMapping = Mapping[str, str]  # host -> container
@@ -39,9 +39,9 @@ class HTTPToolClient:
     def url(self) -> str:
         return f"http://{self.host}:{self.port}"
 
-    def run(self, **kwargs: ArgumentType) -> RunToolResponse:
+    def run(self, **kwargs: ArgumentType) -> ToolRunResult:
         response = self.http_client.post(f"{self.url}/run", json=kwargs)
-        return RunToolResponse.model_validate_json(response.text)
+        return ToolRunResult.model_validate_json(response.text)
 
     def is_alive(self) -> bool:
         try:
