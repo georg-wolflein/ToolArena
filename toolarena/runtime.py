@@ -217,7 +217,7 @@ class DockerRuntimeClient(HTTPToolClient):
         name: str,
         build_context: Path | str,
         image: str = DEFAULT_TOOL_IMAGE_NAME,
-        tag: str = "latest",
+        tag: str | None = None,
         port: int | None = None,
         reuse_existing: bool = True,
         build: bool = False,
@@ -228,6 +228,7 @@ class DockerRuntimeClient(HTTPToolClient):
         allow_build: bool = True,
     ) -> Self:
         """Create a new runtime client by building the image and starting the container."""
+        tag = tag or name
         client = get_docker()
 
         try:
