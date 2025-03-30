@@ -129,7 +129,7 @@ class Mounts:
 
 
 def build_image(
-    repository: str,
+    repository: str = DEFAULT_TOOL_IMAGE_NAME,
     *,
     tag: str,
     context: Path | str,
@@ -207,7 +207,7 @@ class DockerRuntimeClient(HTTPToolClient):
     def create(
         cls,
         name: str,
-        image: str | Image = DEFAULT_TOOL_IMAGE_NAME,
+        image: str | Image,
         port: int | None = None,
         timeout: float | None = 10.0,  # max wait time for the runtime to become ready
         mounts: Mounts | None = None,
