@@ -1,17 +1,15 @@
 """This is the client that communicates with the tool runtime running inside a Docker container."""
 
 import os
-import random
 import shutil
 from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Final, Self, Sequence
+from typing import Final, Self, Sequence, cast
 
 import docker
 import httpx
 import tenacity
-from docker.errors import APIError as DockerAPIError
 from docker.errors import NotFound as DockerNotFoundError
 from docker.models.containers import Container
 from docker.models.images import Image
@@ -26,6 +24,7 @@ type MountMapping = Mapping[str, str]  # host -> container
 
 TOOL_DOCKERFILE: Final[Path] = ROOT_DIR / "docker" / "tool.Dockerfile"
 DEFAULT_TOOL_IMAGE_NAME: Final[str] = "toolarena-tool"
+DOCKER_CONTAINER_PORT: Final[str] = "8000/tcp"
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -53,7 +52,7 @@ class HTTPToolClient:
         except httpx.HTTPError:
             return False
 
-    def wait_for_alive(self, timeout: float | None = 10.0) -> None:
+    def wait_for_alive(self, timeout: float | None = 10.0) -> Self:
         if timeout is None:
             timeout = float("inf")
 
@@ -65,6 +64,7 @@ class HTTPToolClient:
             raise RuntimeError(
                 f"Runtime client did not become ready after {timeout} seconds"
             )
+        return self
 
 
 def get_docker() -> docker.DockerClient:
@@ -100,7 +100,7 @@ class Mounts:
             )
         return mounts
 
-    def reset(self) -> None:
+    def setup(self) -> None:
         """Setup the input and output mounts by copying data."""
         if self.output:
             rmdir(self.output)
@@ -156,16 +156,19 @@ def build_image(
 @dataclass(frozen=True, kw_only=True)
 class DockerRuntimeClient(HTTPToolClient):
     name: str  # the name of the container
-    repository: str  # the docker repository of the image (i.e. name of the image)
-    tag: str  # the docker tag of the image
+    image: Image  # the docker image
+
+    @classmethod
+    def _get_host_port(cls, container: Container) -> int:
+        container.reload()
+        return int(container.ports[DOCKER_CONTAINER_PORT][0]["HostPort"])
 
     @classmethod
     def _start_container(
         cls,
-        image: str,
+        image: Image,
         name: str,
-        port: int,
-        tag: str = "latest",
+        port: int | None = None,  # None lets SDK choose port
         mounts: Mounts | None = None,
         gpus: Sequence[str] | None = None,
         env: Mapping[str, str] = {},
@@ -180,14 +183,14 @@ class DockerRuntimeClient(HTTPToolClient):
             if "CUDA_VISIBLE_DEVICES" not in env:
                 env = dict(env)
                 env["CUDA_VISIBLE_DEVICES"] = ",".join(str(i) for i in range(len(gpus)))
-        logger.debug(f"Starting container with GPUs {gpus} on port {port}")
+        logger.debug(f"Starting container with GPUs {gpus}")
 
         # Start a container with the supplied name
         container = get_docker().containers.run(
-            image=f"{image}:{tag}",
+            image=image,
             name=name,
             detach=True,
-            ports={"8000/tcp": port},
+            ports={DOCKER_CONTAINER_PORT: port},
             tty=True,
             mounts=(mounts or Mounts()).to_docker(),
             mem_limit="100g",
@@ -196,91 +199,59 @@ class DockerRuntimeClient(HTTPToolClient):
             environment=dict(env),
         )
         logger.info(
-            f"Started runtime client {container.name} on port {port} from image {image}:{tag}"
+            f"Started runtime client {container.name} on port {cls._get_host_port(container)} from image {image}"
         )
         return container
-
-    @classmethod
-    def from_container(cls, container: Container, port: int | None = None) -> Self:
-        repository, tag = container.image.tags[0].split(":")  # type: ignore[union-attr]
-        return cls(
-            host="localhost",
-            port=port or int(container.ports["8000/tcp"][0]["HostPort"]),
-            name=container.name,  # type: ignore
-            repository=repository,
-            tag=tag,
-        )
 
     @classmethod
     def create(
         cls,
         name: str,
-        build_context: Path | str,
-        image: str = DEFAULT_TOOL_IMAGE_NAME,
-        tag: str | None = None,
+        image: str | Image = DEFAULT_TOOL_IMAGE_NAME,
         port: int | None = None,
-        reuse_existing: bool = True,
-        build: bool = False,
         timeout: float | None = 10.0,  # max wait time for the runtime to become ready
         mounts: Mounts | None = None,
         gpus: Sequence[str] | None = None,
         env: Mapping[str, str] = {},
-        allow_build: bool = True,
     ) -> Self:
         """Create a new runtime client by building the image and starting the container."""
-        tag = tag or name
         client = get_docker()
+        docker_image = cast(
+            Image,
+            image if isinstance(image, Image) else client.images.get(image),
+        )
 
         try:
-            container = client.containers.get(name)
-            logger.info(f"Found existing container {name}")
-            if reuse_existing and mounts is None:
-                for contain_image_tag in container.image.tags:
-                    container_image, container_tag = contain_image_tag.split(":")
-                    if container_image == image and container_tag == tag:
-                        return cls.from_container(container)
+            container: Container = client.containers.get(name)
+            logger.info(f"Found existing container {name}, removing it")
             container.remove(force=True)
-            logger.info(f"Removed existing container {name}")
         except DockerNotFoundError:
             pass
 
-        if build or not client.images.list(f"{image}:{tag}"):
-            if not allow_build:
-                raise RuntimeError(
-                    f"Image {image}:{tag} not found and build is not allowed"
-                )
-            build_image(image, tag=tag, context=build_context)
-
-        def _create_client(*, port: int) -> Self:
-            return cls.from_container(
-                cls._start_container(
-                    image, name, port=port, tag=tag, mounts=mounts, gpus=gpus, env=env
-                ),
-                port=port,
-            )
-
-        if port is None:
-            # Retry until we find an available port
-            def _update_port(retry_state: tenacity.RetryCallState) -> None:
-                port = random.randint(9000, 9999)
-                logger.debug(f"Trying to start container on port {port}")
-                retry_state.kwargs["port"] = port
-
-            _create_client = tenacity.retry(
-                retry=(
-                    tenacity.retry_if_exception_type(DockerAPIError)
-                    & tenacity.retry_if_exception_message(
-                        match="port is already allocated"
-                    )
-                ),
-                before=_update_port,
-            )(_create_client)
-
-        client = _create_client(port=port)
-        client.wait_for_alive(timeout=timeout)
-        return client
+        container = cls._start_container(
+            image=docker_image,
+            name=name,
+            mounts=mounts,
+            gpus=gpus,
+            env=env,
+            port=port,
+        )
+        return cls(
+            host="localhost",
+            port=cls._get_host_port(
+                container
+            ),  # (can't use port directly because it may be None, but we want to use the port that was assigned)
+            name=container.name,  # type: ignore
+            image=docker_image,
+        ).wait_for_alive(timeout=timeout)
 
     def stop(self):
         container = get_docker().containers.get(self.name)
         container.stop()
         container.remove(force=True)
+
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback) -> None:
+        self.stop()

@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field, create_model
 from pydantic_settings import BaseSettings
 
 from toolarena.types import ArgumentType, ArgumentTypeName, argument_type_map
+from toolarena.utils import substitute_env_vars
 
 
 class Repository(BaseSettings):
@@ -39,6 +40,9 @@ class Repository(BaseSettings):
         if self.commit:
             cmd += f" && git checkout {self.commit}"
         return cmd
+
+    def resolve_env(self, env: Mapping[str, str] | None = None) -> Mapping[str, str]:
+        return {k: substitute_env_vars(v, env) for k, v in self.env.items()}
 
 
 class ArgumentDefinition(BaseSettings):
@@ -99,7 +103,7 @@ class TaskDefinition(BaseSettings):
 """
 
     def args_to_pydantic(self, name: str = "ToolCall") -> BaseModel:
-        return create_model(
+        return create_model(  # type: ignore
             name,
             **{
                 k: (argument_type_map[v.type], Field(description=v.description))

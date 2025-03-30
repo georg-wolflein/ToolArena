@@ -19,3 +19,7 @@ argument_type_map: Mapping[ArgumentTypeName, type] = {
 class ToolRunResult(BaseModel):
     return_code: int
     result: Any
+
+    @property
+    def status(self) -> Literal["success", "failure"]:
+        return "success" if self.return_code == 0 else "failure"
