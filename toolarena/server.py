@@ -56,19 +56,27 @@ async def run(args: task_definition.args_to_pydantic()) -> ToolRunResult:  # typ
             ]
         ),
         stdin=asyncio.subprocess.DEVNULL,
-        # stdout=asyncio.subprocess.PIPE,
-        # stderr=asyncio.subprocess.STDOUT,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.STDOUT,
         text=False,
         cwd="/workspace",
         env=os.environ,
         start_new_session=True,  # this is to make sure an error is thrown if the command attempts to read from stdin
     )
+    stdout = b""
+    while (chunk := await process.stdout.read(32)) != b"":  # type: ignore
+        stdout += chunk
+        try:
+            print(chunk.decode("utf-8"), end="")
+        except UnicodeDecodeError:
+            print(chunk, end="")
     return_code = await process.wait()
     response = ToolRunResult(
         return_code=return_code,
-        result=json.load(open(output_path, "r"))["result"]
+        result=json.loads(output_path.read_text())["result"]
         if output_path.exists()
         else None,
+        stdout=stdout.decode("utf-8"),
     )
     for file in (info_path, output_path):
         file.unlink(missing_ok=True)
