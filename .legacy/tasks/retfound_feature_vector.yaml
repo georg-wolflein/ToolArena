@@ -19,7 +19,7 @@ example:
     image_file: /mount/input/retinal_image.jpg
   mount:
     cucumber.jpg: retinal_image.jpg
-test_cases:
+test_invocations:
   jpg:
     arguments:
       image_file: /mount/input/image1.jpg

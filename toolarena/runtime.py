@@ -57,13 +57,15 @@ class HTTPToolClient:
         if timeout is None:
             timeout = float("inf")
 
-        if not tenacity.retry(
-            retry=tenacity.retry_if_result(False.__eq__),
-            stop=tenacity.stop_after_delay(timeout),
-            wait=tenacity.wait_fixed(1),
-        )(self.is_alive)():
+        try:
+            tenacity.retry(
+                retry=tenacity.retry_if_result(False.__eq__),
+                stop=tenacity.stop_after_delay(timeout),
+                wait=tenacity.wait_fixed(1),
+            )(self.is_alive)()
+        except tenacity.RetryError:
             raise RuntimeError(
-                f"Runtime client did not become ready after {timeout} seconds"
+                f"Runtime client did not become ready after {timeout} seconds. You may want to inspect the container logs using `docker logs {self.name}`"
             )
         return self
 

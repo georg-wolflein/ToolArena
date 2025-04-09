@@ -37,7 +37,7 @@ example:
     output_folder: /mount/output/trained_model
   mount:
     msd/Task02_Heart: Task02_Heart
-test_cases:
+test_invocations:
   prostate:
     arguments:
       dataset_path: /mount/input/Task05_Prostate

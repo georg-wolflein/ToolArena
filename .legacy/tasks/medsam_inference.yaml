@@ -24,7 +24,7 @@ example:
     segmentation_file: /mount/output/segmented_image.png
   mount:
     "tcga_brca_patch/TCGA-BRCA_patch_TCGA-BH-A0DE-01Z-00-DX1.64A0340A-8146-48E8-AAF7-4035988B9152.jpg": my_image.jpg
-test_cases:
+test_invocations:
   cucumber:
     arguments:
       image_file: /mount/input/cucumber.jpg

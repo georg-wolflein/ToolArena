@@ -23,7 +23,7 @@ example:
     slide_dir: /mount/input/TCGA-BRCA-SLIDES
   mount:
     "tcga/TCGA-BRCA-SLIDES": "TCGA-BRCA-SLIDES"
-test_cases:
+test_invocations:
   crc:
     arguments:
       output_dir: /mount/output/TCGA-CRC-features

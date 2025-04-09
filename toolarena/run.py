@@ -47,6 +47,7 @@ class ToolRunRequest(BaseModel):
     invocation: Invocation
     install_script: str
     code_implementation: str
+    _cache_root: Path = RUNS_DIR
 
     @classmethod
     def from_paths(
@@ -55,12 +56,14 @@ class ToolRunRequest(BaseModel):
         install_script: Path,
         code_implementation: Path,
         invocation: Invocation,
+        cache_root: Path = RUNS_DIR,
     ) -> Self:
         return cls(
             definition=TaskDefinition.from_yaml(task_file),
             invocation=invocation,
             install_script=install_script.read_text(),
             code_implementation=code_implementation.read_text(),
+            _cache_root=cache_root,
         )
 
     def hash(self) -> str:
@@ -70,7 +73,7 @@ class ToolRunRequest(BaseModel):
 
     @property
     def run_dir(self) -> Path:
-        return RUNS_DIR / self.definition.name / self.hash()
+        return self._cache_root / self.definition.name / self.hash()
 
     @property
     def input_dir(self) -> Path:
@@ -109,6 +112,7 @@ def run_tool(
     code_implementation: Path,
     invocation: Invocation,
     data_dir: Path,
+    cache_root: Path = RUNS_DIR,
 ) -> ToolRunResultWithOutput:
     # Check cache
     request = ToolRunRequest.from_paths(
@@ -116,6 +120,7 @@ def run_tool(
         install_script=install_script,
         code_implementation=code_implementation,
         invocation=invocation,
+        cache_root=cache_root,
     )
     if request.cache_file.exists():
         logger.debug(

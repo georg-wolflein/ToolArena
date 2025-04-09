@@ -20,7 +20,7 @@ returns:
 example:
   arguments:
     sequence: "MKTVRQERLKSIVRILERSKEPVSGAQLAEELSVSRQVIVQDIAYLRSLGYNIVATPRGYVLAGG"
-test_cases:
+test_invocations:
   protein2:
     arguments:
       sequence: "KALTARQQEVFDLIRDHISQTGMPPTRAEIAQRLGFRSPNAAEEHLKALARKGVIEIVSGASRGIRLLQEE"

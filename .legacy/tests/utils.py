@@ -87,7 +87,7 @@ def get_fixtures(tool_name: str) -> Mapping[str, ToolFixture | InvocationFixture
     fixtures = {}
     fixtures["tool"] = _tool_fixture(tool_name, module=module, prefix=prefix)
     definition = ToolDefinition.from_yaml(TASKS_DIR / f"{tool_name}.yaml")
-    for invocation_name, invocation in definition.test_cases.items():
+    for invocation_name, invocation in definition.test_invocations.items():
         fixtures[invocation_name] = _invocation_fixture(
             tool_name, invocation_name, invocation, module=module, prefix=prefix
         )

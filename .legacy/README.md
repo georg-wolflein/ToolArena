@@ -63,7 +63,7 @@ example:  # this section defines one example of how to call the task which will 
     "tcga/TCGA-BRCA-SLIDES": TCGA-BRCA-SLIDES  # the host folder `benchmark/data/tcga/TCGA-BRCA-SLIDES` will be mounted to the container as `/mount/input/TCGA-BRCA-SLIDES`
     "tcga/TCGA-BRCA-DX_CLINI.xlsx": TCGA-BRCA-DX_CLINI.xlsx
     "tcga/TCGA-BRCA-DX_SLIDE.csv": TCGA-BRCA-DX_SLIDE.csv
-test_cases:  # this section defines test cases for downstream evaluation
+test_invocations:  # this section defines test cases for downstream evaluation
   crc_msi:  # name of the test case
     arguments:  # keyword arguments for the test case (each argument must correspond to an argument defined in the `arguments` section)
       slide_dir: /mount/input/TCGA-CRC-SLIDES
@@ -104,7 +104,7 @@ from tests.utils import initialize
 
 initialize()
 ```
-This function registers a pytest fixture named `tool` for the tool itself, e.g. `uni_extract_features`. It also registers a fixture for each invocation of the tool defined in the YAML file in the `test_cases` section, e.g. `kather100k_muc`.
+This function registers a pytest fixture named `tool` for the tool itself, e.g. `uni_extract_features`. It also registers a fixture for each invocation of the tool defined in the YAML file in the `test_invocations` section, e.g. `kather100k_muc`.
 
 Loosely speaking, calling the `initialize()` function is equivalent to the following code:
 ```python

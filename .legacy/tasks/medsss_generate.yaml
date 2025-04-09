@@ -18,7 +18,7 @@ returns:
 example:
   arguments:
     user_message: "How to stop a cough?"
-test_cases:
+test_invocations:
   nsclc:
     arguments:
       user_message: "How would you treat a patient with advanced non-small cell lung cancer?"

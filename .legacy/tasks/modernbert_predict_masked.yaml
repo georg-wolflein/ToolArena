@@ -16,7 +16,7 @@ returns:
 example:
   arguments:
     input_string: "Paris is the [MASK] of France."
-test_cases:
+test_invocations:
   walking:
     arguments:
       input_string: "He walked to the [MASK]."

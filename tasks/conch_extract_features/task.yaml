@@ -21,7 +21,7 @@ example:
     input_image: /mount/input/TUM-TCGA-ACRLPPQE.tif
   mount:
     TUM-TCGA-ACRLPPQE.tif: TUM-TCGA-ACRLPPQE.tif
-test_cases:
+test_invocations:
   tif:
     arguments:
       input_image: /mount/input/MUC/MUC-TCGA-ACCPKIPN.tif

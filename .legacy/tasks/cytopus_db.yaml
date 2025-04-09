@@ -25,7 +25,7 @@ example:
     celltype_of_interest: ["B_memory", "B_naive", "CD4_T", "CD8_T", "DC", "ILC3", "MDC", "NK", "Treg", "gdT", "mast", "pDC", "plasma"]
     global_celltypes: ["all-cells", "leukocyte"]
     output_file: /mount/output/Spectra_dict.json
-test_cases:
+test_invocations:
   B_and_CD4_T:
     arguments:
       celltype_of_interest: ["B", "CD4_T"]

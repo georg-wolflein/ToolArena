@@ -21,7 +21,7 @@ example:
     input_scene: /mount/input/llff_flower
   mount:
     flowmap_datasets/flowmap/llff_flower: llff_flower
-test_cases:
+test_invocations:
   llff_fern:
     arguments:
       input_scene: /mount/input/llff_fern

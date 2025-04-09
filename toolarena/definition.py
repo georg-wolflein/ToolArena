@@ -71,7 +71,7 @@ class TaskDefinition(BaseSettings):
     arguments: Mapping[str, ArgumentDefinition]
     returns: Mapping[str, ArgumentDefinition]
     example: Invocation
-    test_cases: Mapping[str, Invocation] = Field(default_factory=dict)
+    test_invocations: Mapping[str, Invocation] = Field(default_factory=dict)
     note: str | None = (
         None  # additional information about this task (will not be shown to the model)
     )

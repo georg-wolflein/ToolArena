@@ -37,7 +37,7 @@ example:
     "tcga/TCGA-BRCA-SLIDES": "TCGA-BRCA-SLIDES"
     "tcga/TCGA-BRCA-DX_CLINI.xlsx": "TCGA-BRCA-DX_CLINI.xlsx"
     "tcga/TCGA-BRCA-DX_SLIDE.csv": "TCGA-BRCA-DX_SLIDE.csv"
-test_cases:
+test_invocations:
   crc_msi:
     arguments:
       slide_dir: /mount/input/TCGA-CRC-SLIDES

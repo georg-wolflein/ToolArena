@@ -20,7 +20,7 @@ example:
     input_image: /mount/input/TUM/TUM-TCGA-ACRLPPQE.tif
   mount:
     kather100k/CRC-VAL-HE-7K/TUM/TUM-TCGA-ACRLPPQE.tif: TUM/TUM-TCGA-ACRLPPQE.tif
-test_cases:
+test_invocations:
   kather100k_muc:
     arguments:
       input_image: /mount/input/MUC/MUC-TCGA-ACCPKIPN.tif

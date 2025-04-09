@@ -4,7 +4,9 @@ from typing import Annotated
 import typer
 from loguru import logger
 
-from toolarena.definition import TaskDefinition
+from toolarena.definition import Invocation, TaskDefinition
+from toolarena.run import run_tool
+from toolarena.utils import RUNS_DIR
 
 TASKS_DIR = Path(__file__).parent.parent / "tasks"
 
@@ -48,6 +50,66 @@ def generate(name: Annotated[str, typer.Argument(help="The name of the tool")]) 
         tests_file.write_text("import pytest\n")
         logger.info(f"Created {tests_file}")
     print("Done!")
+
+
+@app.command()
+def run(
+    name: Annotated[str, typer.Argument(help="The name of the tool")],
+    invocation: Annotated[
+        str | None,
+        typer.Argument(
+            help="The invocation to run (optional, default run all invocations)"
+        ),
+    ] = None,
+    implementation: Annotated[
+        Path | None,
+        typer.Argument(
+            help="Path to the folder where the implementation is stored (optional, default use the implementation in the task directory). This folder should contain an install.sh script and a implementation.py file."
+        ),
+    ] = None,
+    cache: Annotated[
+        Path | None,
+        typer.Option(
+            help="The root directory for caching tool runs (optional, default use the default cache root)"
+        ),
+    ] = RUNS_DIR,
+) -> None:
+    """Run a tool."""
+    task_dir = TASKS_DIR / name
+    task_file = task_dir / "task.yaml"
+    definition = TaskDefinition.from_yaml(task_file)
+
+    def _run(invocation_name: str, invocation: Invocation) -> None:
+        logger.info(f"Running {invocation_name} for {name}")
+        result = run_tool(
+            task_file=task_file,
+            install_script=(implementation or task_dir) / "install.sh",
+            code_implementation=(implementation or task_dir) / "implementation.py",
+            invocation=invocation,
+            data_dir=task_dir / "data",
+            cache_root=cache,
+        )
+        print(
+            f"Tool {name} invocation {invocation_name} finished with status {result.status}"
+        )
+        print(result.result)
+
+    for invocation_name, invocation in (
+        [
+            ("example", definition.example),
+            *definition.test_invocations.items(),
+        ]
+        if not invocation
+        else [
+            (
+                invocation,
+                definition.example
+                if invocation == "example"
+                else definition.test_invocations[invocation],
+            )
+        ]
+    ):
+        _run(invocation_name, invocation)
 
 
 app()

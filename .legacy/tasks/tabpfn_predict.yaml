@@ -37,7 +37,7 @@ example:
   mount:
     "tabpfn/breast_cancer_train.csv": "breast_cancer_train.csv"
     "tabpfn/breast_cancer_test.csv": "breast_cancer_test.csv"
-test_cases:
+test_invocations:
   diabetes:
     arguments:
       train_csv: /mount/input/diabetes_train.csv

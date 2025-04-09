@@ -50,7 +50,7 @@ example:
     "pathfinder/mus_fraction_score.py": "mus_fraction_score.py"
     "pathfinder/TCGA_CRC_info.csv": "TCGA_CRC_info.csv"
     "pathfinder/TCGA_CRC_files.csv": "TCGA_CRC_files.csv"
-test_cases:
+test_invocations:
   crc_tum_fraction_score:
     arguments:
       heatmaps: /mount/input/TCGA_CRC
