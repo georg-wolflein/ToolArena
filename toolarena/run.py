@@ -1,104 +1,146 @@
-from __future__ import annotations
-
-import dataclasses
-import shutil
+import hashlib
+import json
 import tempfile
-import uuid
-from collections.abc import Mapping
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Self
 
+import dotenv
+import yaml
 from docker.models.images import Image
+from loguru import logger
+from pydantic import BaseModel
 
 from toolarena.definition import Invocation, TaskDefinition
-from toolarena.runtime import (
-    DEFAULT_TOOL_IMAGE_NAME,
-    DockerRuntimeClient,
-    Mounts,
-    build_image,
-)
-from toolarena.types import ArgumentType, ToolRunResult
+from toolarena.runtime import DockerRuntimeClient, Mounts, build_image
+from toolarena.types import ToolRunResult
+from toolarena.utils import RUNS_DIR
 
 
-@dataclass(frozen=True, kw_only=True)
-class ToolExecutor:
-    image: Image
-
-    @classmethod
-    def create(
-        cls,
-        name: str,
-        install_script_path: Path,
-        python_implementation_path: Path,
-        env: Mapping[str, str] = {},
-    ) -> Self:
-        with tempfile.TemporaryDirectory() as t:
-            temp_dir = Path(t)
-            shutil.copy(install_script_path, temp_dir / "install.sh")
-            shutil.copy(python_implementation_path, temp_dir / "implementation.py")
-            with open(temp_dir / ".env", "w") as f:
-                for k, v in env.items():
-                    assert isinstance(v, str), (
-                        f"Environment variable {k} is not a string"
-                    )
-                    f.write(f"{k}={v!r}\n")
-            return cls(
-                image=build_image(
-                    repository=DEFAULT_TOOL_IMAGE_NAME,
-                    tag=name,
-                    context=temp_dir,
-                )
-            )
-
-    def run(
-        self,
-        arguments: Mapping[str, ArgumentType],
-        mounts: Mounts = Mounts(),
-        env: Mapping[str, str] = {},
-        name: str | None = None,
-    ) -> ToolRunResult:
-        with DockerRuntimeClient.create(
-            name=name or f"toolarena-{uuid.uuid4()}",
-            image=self.image,
-            mounts=mounts,
-            env=env,
-        ) as client:
-            mounts.setup()
-            return client.run(**arguments)
+def _build_tool_image(
+    definition: TaskDefinition,
+    install_script: str,
+    code_implementation: str,
+) -> Image:
+    environment = definition.repo.resolve_env()
+    with tempfile.TemporaryDirectory() as temp_dir:
+        logger.debug(
+            f"Building tool image {definition.name} in {temp_dir} with environment {environment}"
+        )
+        temp_dir_path = Path(temp_dir)
+        temp_dir_path.joinpath("task.yaml").write_text(
+            yaml.dump(definition.model_dump())
+        )
+        temp_dir_path.joinpath("install.sh").write_text(install_script)
+        temp_dir_path.joinpath("implementation.py").write_text(code_implementation)
+        temp_dir_path.joinpath(".env").touch()
+        for key, value in environment.items():
+            dotenv.set_key(temp_dir_path / ".env", key, value)
+        return build_image(tag=definition.name, context=temp_dir_path)
 
 
-@dataclass(frozen=True, kw_only=True)
-class ToolArenaExecutor(ToolExecutor):
-    tool_dir: Path
+class ToolRunResultWithOutput(ToolRunResult):
+    output_dir: Path
+
+
+class ToolRunRequest(BaseModel):
     definition: TaskDefinition
+    invocation: Invocation
+    install_script: str
+    code_implementation: str
 
     @classmethod
-    def create_from_tool_dir(cls, tool_dir: Path) -> Self:
-        definition = TaskDefinition.from_yaml(tool_dir / "task.yaml")
-        executor = cls.create(
-            name=definition.name,
-            install_script_path=tool_dir / "install.sh",
-            python_implementation_path=tool_dir / "implementation.py",
-            env=definition.repo.resolve_env(),
-        )
+    def from_paths(
+        cls,
+        task_file: Path,
+        install_script: Path,
+        code_implementation: Path,
+        invocation: Invocation,
+    ) -> Self:
         return cls(
-            tool_dir=tool_dir,
-            definition=definition,
-            **dataclasses.asdict(executor),
+            definition=TaskDefinition.from_yaml(task_file),
+            invocation=invocation,
+            install_script=install_script.read_text(),
+            code_implementation=code_implementation.read_text(),
         )
 
-    def run_invocation(self, invocation: Invocation) -> ToolRunResult:
-        # TODO: configure run_dir
-        # TODO: caching
-        run_dir = self.tool_dir / "run"
-        return self.run(
-            arguments=invocation.arguments,
-            mounts=Mounts(
-                input=run_dir / "input",
-                output=run_dir / "output",
-                data_dir=self.tool_dir / "data",
-                input_mapping=invocation.mount,
-            ),
-            env=self.definition.repo.resolve_env(),
+    def hash(self) -> str:
+        return hashlib.sha256(
+            json.dumps(self.model_dump(), sort_keys=True).encode("utf-8")
+        ).hexdigest()
+
+    @property
+    def run_dir(self) -> Path:
+        return RUNS_DIR / self.definition.name / self.hash()
+
+    @property
+    def input_dir(self) -> Path:
+        return self.run_dir / "input"
+
+    @property
+    def output_dir(self) -> Path:
+        return self.run_dir / "output"
+
+    @property
+    def cache_file(self) -> Path:
+        return self.run_dir / "result.json"
+
+    def write_cache(self, result: ToolRunResult):
+        self.run_dir.mkdir(parents=True, exist_ok=True)
+        self.cache_file.write_text(result.model_dump_json(indent=2))
+        self.run_dir.joinpath("install.sh").write_text(self.install_script)
+        self.run_dir.joinpath("implementation.py").write_text(self.code_implementation)
+        self.run_dir.joinpath("task.yaml").write_text(
+            yaml.dump(self.definition.model_dump())
         )
+
+    def read_cache(self) -> ToolRunResultWithOutput:
+        return ToolRunResultWithOutput(
+            **ToolRunResult.model_validate_json(
+                self.cache_file.read_text()
+            ).model_dump(),
+            output_dir=self.output_dir,
+        )
+
+
+def run_tool(
+    *,
+    task_file: Path,
+    install_script: Path,
+    code_implementation: Path,
+    invocation: Invocation,
+    data_dir: Path,
+) -> ToolRunResultWithOutput:
+    # Check cache
+    request = ToolRunRequest.from_paths(
+        task_file=task_file,
+        install_script=install_script,
+        code_implementation=code_implementation,
+        invocation=invocation,
+    )
+    if request.cache_file.exists():
+        logger.debug(
+            f"Retrieving cached result for {request.definition.name} at {request.cache_file}"
+        )
+        return request.read_cache()
+
+    # Build image and run tool
+    image = _build_tool_image(
+        request.definition,
+        install_script=request.install_script,
+        code_implementation=request.code_implementation,
+    )
+    mounts = Mounts(
+        input=request.input_dir,
+        output=request.output_dir,
+        data_dir=data_dir,
+        input_mapping=invocation.mount,
+    )
+    mounts.setup()
+    client = DockerRuntimeClient.create(
+        name=request.definition.name, image=image, mounts=mounts
+    )
+    result = client.run(**invocation.arguments)
+
+    # Save result to cache
+    request.write_cache(result)
+    return request.read_cache()

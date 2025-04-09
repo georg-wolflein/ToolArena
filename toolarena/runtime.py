@@ -53,6 +53,7 @@ class HTTPToolClient:
             return False
 
     def wait_for_alive(self, timeout: float | None = 10.0) -> Self:
+        logger.debug(f"Waiting for runtime client {self.name} to become ready")
         if timeout is None:
             timeout = float("inf")
 

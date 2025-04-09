@@ -1,3 +1,5 @@
+import hashlib
+import json
 from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Self
@@ -53,6 +55,11 @@ class ArgumentDefinition(BaseSettings):
 class Invocation(BaseSettings):
     arguments: Mapping[str, ArgumentType]
     mount: Mapping[str, str] = Field(default_factory=dict)
+
+    def hash(self) -> str:
+        return hashlib.sha256(
+            json.dumps(self.model_dump(), sort_keys=True).encode("utf-8")
+        ).hexdigest()
 
 
 class TaskDefinition(BaseSettings):

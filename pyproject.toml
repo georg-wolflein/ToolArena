@@ -17,6 +17,7 @@ dependencies = [
     "pydantic-settings>=2.8.1",
     "pytest>=8.3.5",
     "pytest-lazy-fixtures>=1.1.2",
+    "python-dotenv>=1.0.1",
     "pyyaml>=6.0.2",
     "tenacity>=9.0.0",
     "typer>=0.15.2",
@@ -25,7 +26,7 @@ dependencies = [
 
 
 [tool.ruff]
-src = ["davinci"]
+src = ["toolarena"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I001"]

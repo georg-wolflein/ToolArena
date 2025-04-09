@@ -7,6 +7,7 @@ from pathlib import Path
 from loguru import logger
 
 ROOT_DIR = Path(__file__).parent.parent
+RUNS_DIR = ROOT_DIR / "runs"
 
 
 def join_paths(parent: os.PathLike | str, *children: os.PathLike | str) -> Path:
