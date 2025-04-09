@@ -1,8 +1,4 @@
-FROM ghcr.io/georg-wolflein/toolarena-runtime:latest
-# FROM toolarena-runtime:latest
-
-ENV HOST=0.0.0.0
-ENV PORT=8000
+FROM ghcr.io/georg-wolflein/toolarena:main
 
 RUN mkdir -p /toolarena_runtime
 COPY install.sh /toolarena_runtime/install.sh
@@ -15,5 +11,9 @@ RUN chmod +x /toolarena_runtime/install.sh && \
 
 COPY task.yaml /toolarena_runtime/task.yaml
 COPY implementation.py /toolarena_runtime/implementation.py
+
+ENV HOST=0.0.0.0
+ENV PORT=8000
+ENV TOOLARENA_RUNTIME_DIR=/toolarena_runtime
 
 CMD /toolarena/.venv/bin/uvicorn --app-dir /toolarena --host ${HOST} --port ${PORT} toolarena.server:app

@@ -161,7 +161,10 @@ class DockerRuntimeClient(HTTPToolClient):
     @classmethod
     def _get_host_port(cls, container: Container) -> int:
         container.reload()
-        return int(container.ports[DOCKER_CONTAINER_PORT][0]["HostPort"])
+        if not (ports := container.ports):
+            raise RuntimeError("Container is not running")
+        port = ports[DOCKER_CONTAINER_PORT][0]["HostPort"]
+        return int(port.split("/")[0])  # may be "1234/tcp"
 
     @classmethod
     def _start_container(
@@ -199,7 +202,7 @@ class DockerRuntimeClient(HTTPToolClient):
             environment=dict(env),
         )
         logger.info(
-            f"Started runtime client {container.name} on port {cls._get_host_port(container)} from image {image}"
+            f"Started runtime client {container.name} on port {cls._get_host_port(container)} from image {image.tags}"
         )
         return container
 

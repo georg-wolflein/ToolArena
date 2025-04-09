@@ -65,7 +65,10 @@ async def run(args: task_definition.args_to_pydantic()) -> ToolRunResult:  # typ
     )
     return_code = await process.wait()
     response = ToolRunResult(
-        return_code=return_code, result=json.load(open(output_path, "r"))["result"]
+        return_code=return_code,
+        result=json.load(open(output_path, "r"))["result"]
+        if output_path.exists()
+        else None,
     )
     for file in (info_path, output_path):
         file.unlink(missing_ok=True)
