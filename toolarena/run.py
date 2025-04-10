@@ -1,5 +1,4 @@
 import hashlib
-import json
 import tempfile
 from pathlib import Path
 from typing import Self
@@ -42,9 +41,13 @@ class ToolRunResultWithOutput(ToolRunResult):
     output_dir: Path
 
 
-class ToolRunRequest(BaseModel):
+class InvocationWithData(Invocation):
+    data_dir: Path
+
+
+class ToolRunner(BaseModel):
     definition: TaskDefinition
-    invocation: Invocation
+    invocation: InvocationWithData
     install_script: str
     code_implementation: str
     _cache_root: Path = RUNS_DIR
@@ -55,21 +58,20 @@ class ToolRunRequest(BaseModel):
         task_file: Path,
         install_script: Path,
         code_implementation: Path,
-        invocation: Invocation,
+        invocation: InvocationWithData,
+        data_dir: Path,
         cache_root: Path = RUNS_DIR,
     ) -> Self:
         return cls(
             definition=TaskDefinition.from_yaml(task_file),
-            invocation=invocation,
+            invocation=InvocationWithData(**invocation.model_dump(), data_dir=data_dir),
             install_script=install_script.read_text(),
             code_implementation=code_implementation.read_text(),
             _cache_root=cache_root,
         )
 
     def hash(self) -> str:
-        return hashlib.sha256(
-            json.dumps(self.model_dump(), sort_keys=True).encode("utf-8")
-        ).hexdigest()
+        return hashlib.sha256(self.model_dump_json().encode("utf-8")).hexdigest()
 
     @property
     def run_dir(self) -> Path:
@@ -87,6 +89,33 @@ class ToolRunRequest(BaseModel):
     def cache_file(self) -> Path:
         return self.run_dir / "result.json"
 
+    def run_without_cache(self) -> ToolRunResult:
+        """Build image and run tool without using cache."""
+        image = _build_tool_image(
+            self.definition,
+            install_script=self.install_script,
+            code_implementation=self.code_implementation,
+        )
+        mounts = Mounts(
+            input=self.input_dir,
+            output=self.output_dir,
+            data_dir=self.invocation.data_dir,
+            input_mapping=self.invocation.mount,
+        )
+        mounts.setup()
+        client = DockerRuntimeClient.create(
+            name=self.definition.name, image=image, mounts=mounts
+        )
+        return client.run(**self.invocation.arguments)
+
+    def run(self) -> ToolRunResultWithOutput:
+        """Build image and run tool, using cache if available."""
+        if self.is_cached():
+            return self.read_cache()
+        result = self.run_without_cache()
+        self.write_cache(result)
+        return self.read_cache()
+
     def write_cache(self, result: ToolRunResult):
         self.run_dir.mkdir(parents=True, exist_ok=True)
         self.cache_file.write_text(result.model_dump_json(indent=2))
@@ -97,12 +126,18 @@ class ToolRunRequest(BaseModel):
         )
 
     def read_cache(self) -> ToolRunResultWithOutput:
+        logger.debug(
+            f"Retrieving cached result for {self.definition.name} at {self.cache_file}"
+        )
         return ToolRunResultWithOutput(
             **ToolRunResult.model_validate_json(
                 self.cache_file.read_text()
             ).model_dump(),
             output_dir=self.output_dir,
         )
+
+    def is_cached(self) -> bool:
+        return self.cache_file.exists()
 
 
 def run_tool(
@@ -114,38 +149,11 @@ def run_tool(
     data_dir: Path,
     cache_root: Path = RUNS_DIR,
 ) -> ToolRunResultWithOutput:
-    # Check cache
-    request = ToolRunRequest.from_paths(
+    return ToolRunner.from_paths(
         task_file=task_file,
         install_script=install_script,
         code_implementation=code_implementation,
         invocation=invocation,
-        cache_root=cache_root,
-    )
-    if request.cache_file.exists():
-        logger.debug(
-            f"Retrieving cached result for {request.definition.name} at {request.cache_file}"
-        )
-        return request.read_cache()
-
-    # Build image and run tool
-    image = _build_tool_image(
-        request.definition,
-        install_script=request.install_script,
-        code_implementation=request.code_implementation,
-    )
-    mounts = Mounts(
-        input=request.input_dir,
-        output=request.output_dir,
         data_dir=data_dir,
-        input_mapping=invocation.mount,
-    )
-    mounts.setup()
-    client = DockerRuntimeClient.create(
-        name=request.definition.name, image=image, mounts=mounts
-    )
-    result = client.run(**invocation.arguments)
-
-    # Save result to cache
-    request.write_cache(result)
-    return request.read_cache()
+        cache_root=cache_root,
+    ).run()

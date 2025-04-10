@@ -3,18 +3,18 @@ from pathlib import Path
 import numpy as np
 import pytest
 from pytest_lazy_fixtures import lf
-from tests.utils import TESTS_DATA_DIR, initialize, parametrize_invocation
+from tasks.utils import initialize, parametrize_invocation
 from toolarena.types import ToolRunResult
 
 initialize()
 
 
-@parametrize_invocation("kather100k_muc", "tcga_brca_patch_png", "tcga_brca_patch_jpg")
+@parametrize_invocation("tif", "png", "jpg")
 def test_status(invocation: ToolRunResult):
     assert invocation.status == "success"
 
 
-@parametrize_invocation("kather100k_muc", "tcga_brca_patch_png", "tcga_brca_patch_jpg")
+@parametrize_invocation("tif", "png", "jpg")
 def test_shape_and_type(invocation: ToolRunResult):
     assert "features" in invocation.result
     features = invocation.result["features"]
@@ -26,11 +26,11 @@ def test_shape_and_type(invocation: ToolRunResult):
 @pytest.mark.parametrize(
     "invocation,expected_features_file",
     [
-        (lf(test_case), TESTS_DATA_DIR / filename)
+        (lf(test_case), Path(__file__).parent.joinpath("data", "tests", filename))
         for (test_case, filename) in {
-            "kather100k_muc": "conch_MUC-TCGA-ACCPKIPN.tif.npy",
-            "tcga_brca_patch_png": "conch_TCGA-BRCA_patch_TCGA-BH-A0DE-01Z-00-DX1.64A0340A-8146-48E8-AAF7-4035988B9152.png.npy",
-            "tcga_brca_patch_jpg": "conch_TCGA-BRCA_patch_TCGA-BH-A0DE-01Z-00-DX1.64A0340A-8146-48E8-AAF7-4035988B9152.jpg.npy",
+            "tif": "conch_MUC-TCGA-ACCPKIPN.tif.npy",
+            "png": "conch_TCGA-BRCA_patch_TCGA-BH-A0DE-01Z-00-DX1.64A0340A-8146-48E8-AAF7-4035988B9152.png.npy",
+            "jpg": "conch_TCGA-BRCA_patch_TCGA-BH-A0DE-01Z-00-DX1.64A0340A-8146-48E8-AAF7-4035988B9152.jpg.npy",
         }.items()
     ],
 )

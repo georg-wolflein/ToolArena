@@ -6,9 +6,7 @@ from loguru import logger
 
 from toolarena.definition import Invocation, TaskDefinition
 from toolarena.run import run_tool
-from toolarena.utils import RUNS_DIR
-
-TASKS_DIR = Path(__file__).parent.parent / "tasks"
+from toolarena.utils import RUNS_DIR, TASKS_DIR
 
 app = typer.Typer()
 

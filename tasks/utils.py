@@ -1,0 +1,102 @@
+"""Utilities for task tests."""
+
+import inspect
+from collections.abc import Callable, Mapping
+from pathlib import Path
+
+import pytest
+from pytest_lazy_fixtures import lf
+from toolarena.definition import Invocation, TaskDefinition
+from toolarena.run import ToolRunner, ToolRunResultWithOutput
+from toolarena.utils import TASKS_DIR
+
+type ToolFixture = Callable[[Invocation], ToolRunResultWithOutput]
+type InvocationFixture = Callable[[ToolFixture], ToolRunResultWithOutput]
+
+
+def _invocation_fixture(
+    tool_name: str,
+    invocation_name: str,
+    invocation: Invocation,
+    module: str,
+    prefix: str | None = None,
+) -> InvocationFixture:
+    full_tool_name = f"{prefix}/{tool_name}" if prefix else tool_name
+
+    def fixture(
+        candidate_impl_dir: Path, request: pytest.FixtureRequest
+    ) -> ToolRunResultWithOutput:
+        runner = ToolRunner.from_paths(
+            task_file=TASKS_DIR / tool_name / "task.yaml",
+            install_script=candidate_impl_dir / tool_name / "install.sh",
+            code_implementation=candidate_impl_dir / tool_name / "implementation.py",
+            invocation=invocation,
+            data_dir=TASKS_DIR / tool_name / "data",
+        )
+        if (
+            request.config.getoption("--skip-uncached", False)
+            and not runner.is_cached()
+        ):
+            pytest.skip(
+                f"Skipping uncached invocation {invocation_name} for {full_tool_name}"
+            )
+        return runner.run()
+
+    fixture.__name__ = invocation_name
+    fixture.__doc__ = f"Test invocation {invocation_name} for {full_tool_name}."
+    fixture.__module__ = module
+
+    return pytest.fixture(
+        fixture,
+        scope="module",
+        params=[
+            pytest.param(
+                None,
+                marks=[
+                    pytest.mark.tool_invocation(
+                        prefix=prefix, tool=tool_name, invocation=invocation_name
+                    )
+                ],
+            )
+        ],
+        ids=[full_tool_name],
+    )
+
+
+def parametrize_invocation(
+    *invocations: str | InvocationFixture,
+) -> pytest.MarkDecorator:
+    return pytest.mark.parametrize(
+        "invocation",
+        [lf(getattr(invocation, "__name__", invocation)) for invocation in invocations],
+    )
+
+
+def _get_fixtures(tool_name: str) -> Mapping[str, ToolFixture | InvocationFixture]:
+    module = f"tasks.{tool_name}.tests"
+    fixtures = {}
+    definition = TaskDefinition.from_yaml(TASKS_DIR / tool_name / "task.yaml")
+    for invocation_name, invocation in definition.test_invocations.items():
+        fixtures[invocation_name] = _invocation_fixture(
+            tool_name, invocation_name, invocation, module=module
+        )
+    return fixtures
+
+
+def initialize() -> None:
+    """Initialize the fixtures for the current test module.
+
+    This function should be called from each test module, where the name of the test file is `<tool_name>/tests.py`.
+    It will populate the global namespace with the fixtures for the tool.
+    """
+    frame = inspect.currentframe()
+    try:
+        caller_frame = frame.f_back
+        file_path = Path(caller_frame.f_code.co_filename)
+        assert file_path.name == "tests.py", (
+            "This function should be called from a test file"
+        )
+        tool_name = file_path.parent.name
+        caller_frame.f_globals.update(_get_fixtures(tool_name))
+    finally:
+        del frame  # Break reference cycle
