@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 import hashlib
 import json
 from collections.abc import Mapping, Sequence
 from pathlib import Path
-from typing import Self
+from typing import TYPE_CHECKING, Self
 
 import yaml
 from pydantic import BaseModel, Field, create_model
@@ -10,6 +12,9 @@ from pydantic_settings import BaseSettings
 
 from toolarena.types import ArgumentType, ArgumentTypeName, argument_type_map
 from toolarena.utils import substitute_env_vars
+
+if TYPE_CHECKING:
+    from toolarena.run import ToolImplementation
 
 
 class Repository(BaseSettings):
@@ -116,4 +121,15 @@ class TaskDefinition(BaseSettings):
                 k: (argument_type_map[v.type], Field(description=v.description))
                 for k, v in self.arguments.items()
             },
+        )
+
+    def build(
+        self, install_script: Path, code_implementation: Path
+    ) -> ToolImplementation:
+        from toolarena.run import build_tool
+
+        return build_tool(
+            definition=self,
+            install_script=install_script.read_text(),
+            code_implementation=code_implementation.read_text(),
         )
