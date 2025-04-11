@@ -55,13 +55,20 @@ class ToolImplementation(BaseModel):
     code_implementation: str
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    def run(self, invocation: ToolInvocation, data_dir: Path) -> ToolResult:
+    def run(
+        self,
+        invocation: ToolInvocation,
+        *,
+        data_dir: Path,
+        cache_root: Path | None = RUNS_DIR,
+    ) -> ToolResult:
         return ToolRunner(
             definition=self.definition,
             invocation=invocation,
             data_dir=data_dir,
             install_script=self.install_script,
             code_implementation=self.code_implementation,
+            _cache_root=cache_root,
         ).run(self.image)
 
 

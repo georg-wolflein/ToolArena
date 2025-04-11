@@ -1,5 +1,6 @@
 .DS_Store
 /runs
+.repomix-output*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

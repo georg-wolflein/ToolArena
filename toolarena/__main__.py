@@ -5,7 +5,6 @@ import typer
 from loguru import logger
 
 from toolarena.definition import ToolDefinition, ToolInvocation
-from toolarena.run import run_tool
 from toolarena.utils import RUNS_DIR, TASKS_DIR
 
 app = typer.Typer()
@@ -74,19 +73,18 @@ def run(
 ) -> None:
     """Run a tool."""
     task_dir = TASKS_DIR / name
-    task_file = task_dir / "task.yaml"
-    definition = ToolDefinition.from_yaml(task_file)
+    implementation_dir = implementation or task_dir
+    definition = ToolDefinition.from_yaml(task_dir / "task.yaml")
+    tool = definition.build(
+        install_script=implementation_dir.joinpath("install.sh").read_text(),
+        code_implementation=implementation_dir.joinpath(
+            "implementation.py"
+        ).read_text(),
+    )
 
     def _run(invocation_name: str, invocation: ToolInvocation) -> None:
         logger.info(f"Running {invocation_name} for {name}")
-        result = run_tool(
-            task_file=task_file,
-            install_script=(implementation or task_dir) / "install.sh",
-            code_implementation=(implementation or task_dir) / "implementation.py",
-            invocation=invocation,
-            data_dir=task_dir / "data",
-            cache_root=cache,
-        )
+        result = tool.run(invocation, data_dir=task_dir / "data", cache_root=cache)
         print(
             f"Tool {name} invocation {invocation_name} finished with status {result.status}"
         )
