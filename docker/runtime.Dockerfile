@@ -1,5 +1,7 @@
 FROM python:3.12
 
+SHELL ["/bin/bash", "-c"]
+
 WORKDIR /toolarena
 
 COPY pyproject.toml uv.lock ./
