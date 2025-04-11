@@ -1,7 +1,10 @@
 """This is the client that communicates with the tool runtime running inside a Docker container."""
 
+import itertools
 import os
+import re
 import shutil
+import sys
 from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
@@ -10,10 +13,12 @@ from typing import Final, Self, Sequence, cast
 import docker
 import httpx
 import tenacity
+from docker.errors import BuildError
 from docker.errors import NotFound as DockerNotFoundError
 from docker.models.containers import Container
 from docker.models.images import Image
 from docker.types import DeviceRequest, Mount
+from docker.utils.json_stream import json_stream
 from loguru import logger
 
 from toolarena.types import ArgumentType, ToolRunResult
@@ -138,22 +143,41 @@ def build_image(
     context: Path | str,
     dockerfile: Path | str = TOOL_DOCKERFILE,
 ) -> Image:
-    """Build the image from docker/runtime.Dockerfile using BuildKit."""
+    """Build an image using Docker BuildKit via the low-level Docker API.
+
+    The implementation follows the implementation of `DockerClient.images.build()`.
+    This function streams the build output to the console while the build is running.
+    """
     logger.debug(f"Building image {repository}:{tag} using Docker BuildKit")
-    image, output = get_docker().images.build(
+    resp = get_docker().api.build(
         path=str(context),
         dockerfile=str(dockerfile),
         tag=f"{repository}:{tag}",
         buildargs={"DOCKER_BUILDKIT": "1"},
     )
-    for record in output:
-        try:
-            print(record["stream"], end="")  # type: ignore
-        except Exception:
-            logger.debug(f"Error printing build output: {record}")
-            break
-    logger.info(f"Built image {repository}:{tag} using Docker BuildKit")
-    return image
+
+    if isinstance(resp, str):
+        return get_docker().images.get(resp)
+    last_event = None
+    image_id = None
+    internal_stream, result_stream = itertools.tee(json_stream(resp))
+    for chunk in internal_stream:
+        print(chunk)
+        if "error" in chunk:
+            logger.error(f"Build error: {chunk['error']}")
+            raise BuildError(chunk["error"], result_stream)
+        if "stream" in chunk:
+            print(chunk["stream"], end="", file=sys.stderr)
+            match = re.search(
+                r"(^Successfully built |sha256:)([0-9a-f]+)$", chunk["stream"]
+            )
+            if match:
+                image_id = match.group(2)
+        last_event = chunk
+    if image_id:
+        logger.info(f"Built image {repository}:{tag} using Docker BuildKit")
+        return get_docker().images.get(image_id)
+    raise BuildError(last_event or "Unknown", result_stream)
 
 
 @dataclass(frozen=True, kw_only=True)
