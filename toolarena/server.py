@@ -11,7 +11,7 @@ from loguru import logger
 from toolarena.definition import TaskDefinition
 from toolarena.types import ToolRunResult
 
-RUNTIME_DIR = Path(os.getenv("TOOLARENA_RUNTIME_DIR", "/toolarena_runtime"))
+RUNTIME_DIR = Path(os.getenv("WORKSPACE_DIR", "/workspace"))
 TOOLARENA_DIR = Path(os.getenv("TOOLARENA_DIR", "/toolarena"))
 IMPLEMENTATION_PATH = RUNTIME_DIR / "implementation.py"
 TASK_DEFINITION_PATH = RUNTIME_DIR / "task.yaml"

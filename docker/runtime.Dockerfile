@@ -26,5 +26,4 @@ RUN mkdir -p /toolmaker && ln -s /toolarena/subprocess_utils.py /toolmaker/subpr
 VOLUME /mount/input
 VOLUME /mount/output
 
-RUN mkdir -p /toolarena_runtime
-ENV TOOLARENA_RUNTIME_DIR=/toolarena_runtime
+ENV WORKSPACE_DIR=/workspace
