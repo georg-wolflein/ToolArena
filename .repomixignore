@@ -1,0 +1,7 @@
+.legacy/
+/runs/
+*.xlsx
+*.csv
+*.svs
+/papers
+/data
