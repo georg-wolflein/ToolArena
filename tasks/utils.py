@@ -6,18 +6,22 @@ from pathlib import Path
 
 import pytest
 from pytest_lazy_fixtures import lf
-from toolarena.definition import Invocation, TaskDefinition
-from toolarena.run import ToolRunner, ToolRunResultWithOutput
+from toolarena import (
+    ToolDefinition,
+    ToolInvocation,
+    ToolRunner,
+    ToolRunResult,
+)
 from toolarena.utils import TASKS_DIR
 
-type ToolFixture = Callable[[Invocation], ToolRunResultWithOutput]
-type InvocationFixture = Callable[[ToolFixture], ToolRunResultWithOutput]
+type ToolFixture = Callable[[ToolInvocation], ToolRunResult]
+type InvocationFixture = Callable[[ToolFixture], ToolRunResult]
 
 
 def _invocation_fixture(
     tool_name: str,
     invocation_name: str,
-    invocation: Invocation,
+    invocation: ToolInvocation,
     module: str,
     prefix: str | None = None,
 ) -> InvocationFixture:
@@ -25,13 +29,13 @@ def _invocation_fixture(
 
     def fixture(
         candidate_impl_dir: Path, request: pytest.FixtureRequest
-    ) -> ToolRunResultWithOutput:
+    ) -> ToolRunResult:
         runner = ToolRunner.from_paths(
             task_file=TASKS_DIR / tool_name / "task.yaml",
-            install_script=candidate_impl_dir / tool_name / "install.sh",
-            code_implementation=candidate_impl_dir / tool_name / "implementation.py",
             invocation=invocation,
             data_dir=TASKS_DIR / tool_name / "data",
+            install_script=candidate_impl_dir / tool_name / "install.sh",
+            code_implementation=candidate_impl_dir / tool_name / "implementation.py",
         )
         if (
             request.config.getoption("--skip-uncached", False)
@@ -75,7 +79,7 @@ def parametrize_invocation(
 def _get_fixtures(tool_name: str) -> Mapping[str, ToolFixture | InvocationFixture]:
     module = f"tasks.{tool_name}.tests"
     fixtures = {}
-    definition = TaskDefinition.from_yaml(TASKS_DIR / tool_name / "task.yaml")
+    definition = ToolDefinition.from_yaml(TASKS_DIR / tool_name / "task.yaml")
     for invocation_name, invocation in definition.test_invocations.items():
         fixtures[invocation_name] = _invocation_fixture(
             tool_name, invocation_name, invocation, module=module

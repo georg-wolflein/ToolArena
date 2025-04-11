@@ -1,23 +1,42 @@
 from __future__ import annotations
 
-import hashlib
-import json
 from collections.abc import Mapping, Sequence
 from pathlib import Path
-from typing import TYPE_CHECKING, Self
+from typing import TYPE_CHECKING, Literal, Self
 
 import yaml
 from pydantic import BaseModel, Field, create_model
 from pydantic_settings import BaseSettings
 
-from toolarena.types import ArgumentType, ArgumentTypeName, argument_type_map
 from toolarena.utils import substitute_env_vars
 
 if TYPE_CHECKING:
     from toolarena.run import ToolImplementation
 
+type ArgumentTypeName = Literal["str", "int", "float", "bool", "list", "dict"]
+type ArgumentType = str | int | float | bool | list | dict | None
 
-class Repository(BaseSettings):
+argument_type_map: Mapping[ArgumentTypeName, type] = {
+    "str": str,
+    "int": int,
+    "float": float,
+    "bool": bool,
+    "list": list,
+    "dict": dict,
+}
+
+
+class ArgumentDefinition(BaseModel):
+    description: str
+    type: ArgumentTypeName
+
+
+class ToolInvocation(BaseModel):
+    arguments: Mapping[str, ArgumentType]
+    mount: Mapping[str, str] = Field(default_factory=dict)
+
+
+class Repository(BaseModel):
     name: str
     url: str
     branch: str | None = None
@@ -52,22 +71,7 @@ class Repository(BaseSettings):
         return {k: substitute_env_vars(v, env) for k, v in self.env.items()}
 
 
-class ArgumentDefinition(BaseSettings):
-    description: str
-    type: ArgumentTypeName
-
-
-class Invocation(BaseSettings):
-    arguments: Mapping[str, ArgumentType]
-    mount: Mapping[str, str] = Field(default_factory=dict)
-
-    def hash(self) -> str:
-        return hashlib.sha256(
-            json.dumps(self.model_dump(), sort_keys=True).encode("utf-8")
-        ).hexdigest()
-
-
-class TaskDefinition(BaseSettings):
+class ToolDefinition(BaseSettings):
     name: str
     repo: Repository
     papers: Sequence[str]
@@ -75,8 +79,8 @@ class TaskDefinition(BaseSettings):
     description: str
     arguments: Mapping[str, ArgumentDefinition]
     returns: Mapping[str, ArgumentDefinition]
-    example: Invocation
-    test_invocations: Mapping[str, Invocation] = Field(default_factory=dict)
+    example: ToolInvocation
+    test_invocations: Mapping[str, ToolInvocation] = Field(default_factory=dict)
     note: str | None = (
         None  # additional information about this task (will not be shown to the model)
     )
@@ -124,12 +128,12 @@ class TaskDefinition(BaseSettings):
         )
 
     def build(
-        self, install_script: Path, code_implementation: Path
+        self, install_script: str, code_implementation: str
     ) -> ToolImplementation:
         from toolarena.run import build_tool
 
         return build_tool(
             definition=self,
-            install_script=install_script.read_text(),
-            code_implementation=code_implementation.read_text(),
+            install_script=install_script,
+            code_implementation=code_implementation,
         )

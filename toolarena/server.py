@@ -8,7 +8,7 @@ from uuid import uuid4
 from fastapi import FastAPI
 from loguru import logger
 
-from toolarena.definition import TaskDefinition
+from toolarena.definition import ToolDefinition
 from toolarena.types import ToolRunResult
 
 RUNTIME_DIR = Path(os.getenv("WORKSPACE_DIR", "/workspace"))
@@ -19,7 +19,7 @@ FUNCTION_RUNNER_PATH = TOOLARENA_DIR / "function_runner.py"
 
 app = FastAPI()
 
-task_definition = TaskDefinition.from_yaml(TASK_DEFINITION_PATH)
+task_definition = ToolDefinition.from_yaml(TASK_DEFINITION_PATH)
 
 
 @app.get("/info")

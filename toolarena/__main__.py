@@ -4,7 +4,7 @@ from typing import Annotated
 import typer
 from loguru import logger
 
-from toolarena.definition import Invocation, TaskDefinition
+from toolarena.definition import ToolDefinition, ToolInvocation
 from toolarena.run import run_tool
 from toolarena.utils import RUNS_DIR, TASKS_DIR
 
@@ -16,7 +16,7 @@ def signature(
     name: Annotated[str, typer.Argument(help="The name of the tool")],
 ) -> None:
     """Print the signature of a tool."""
-    definition = TaskDefinition.from_yaml(TASKS_DIR / name / "task.yaml")
+    definition = ToolDefinition.from_yaml(TASKS_DIR / name / "task.yaml")
     print(definition.python_signature)
 
 
@@ -27,7 +27,7 @@ def generate(name: Annotated[str, typer.Argument(help="The name of the tool")]) 
     definition_path = task_dir / "task.yaml"
     if not definition_path.exists():
         raise typer.Abort(f"Task definition {definition_path} does not exist")
-    definition = TaskDefinition.from_yaml(definition_path)
+    definition = ToolDefinition.from_yaml(definition_path)
 
     code_file = task_dir / "implementation.py"
     install_script = task_dir / "install.sh"
@@ -75,9 +75,9 @@ def run(
     """Run a tool."""
     task_dir = TASKS_DIR / name
     task_file = task_dir / "task.yaml"
-    definition = TaskDefinition.from_yaml(task_file)
+    definition = ToolDefinition.from_yaml(task_file)
 
-    def _run(invocation_name: str, invocation: Invocation) -> None:
+    def _run(invocation_name: str, invocation: ToolInvocation) -> None:
         logger.info(f"Running {invocation_name} for {name}")
         result = run_tool(
             task_file=task_file,

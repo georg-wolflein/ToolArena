@@ -2,11 +2,11 @@ from collections.abc import Callable
 from pathlib import Path
 
 import pytest
-from toolarena.definition import Invocation
-from toolarena.run import ToolRunResultWithOutput
+from toolarena.definition import ToolInvocation
+from toolarena.run import ToolRunResult
 
-type ToolFixture = Callable[[Invocation], ToolRunResultWithOutput]
-type InvocationFixture = Callable[[ToolFixture], ToolRunResultWithOutput]
+type ToolFixture = Callable[[ToolInvocation], ToolRunResult]
+type InvocationFixture = Callable[[ToolFixture], ToolRunResult]
 
 
 def pytest_addoption(parser):

@@ -8,7 +8,7 @@ import sys
 from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Final, Iterator, Self, Sequence, cast
+from typing import Any, Final, Iterator, Literal, Self, Sequence, cast
 
 import docker
 import httpx
@@ -20,8 +20,9 @@ from docker.models.images import Image
 from docker.types import DeviceRequest, Mount
 from docker.utils.json_stream import json_stream
 from loguru import logger
+from pydantic import BaseModel
 
-from toolarena.types import ArgumentType, ToolRunResult
+from toolarena.definition import ArgumentType
 from toolarena.utils import ROOT_DIR, join_paths, rmdir
 
 type MountMapping = Mapping[str, str]  # host -> container
@@ -30,6 +31,20 @@ type MountMapping = Mapping[str, str]  # host -> container
 TOOL_DOCKERFILE: Final[Path] = ROOT_DIR / "docker" / "tool.Dockerfile"
 DEFAULT_TOOL_IMAGE_NAME: Final[str] = "toolarena-tool"
 DOCKER_CONTAINER_PORT: Final[str] = "8000/tcp"
+
+
+class ToolResult(BaseModel):
+    return_code: int
+    result: Any
+    stdout: str
+
+    @property
+    def status(self) -> Literal["success", "failure"]:
+        return "success" if self.return_code == 0 else "failure"
+
+
+class ToolRunResult(ToolResult):
+    output_dir: Path
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -43,9 +58,9 @@ class HTTPToolClient:
     def url(self) -> str:
         return f"http://{self.host}:{self.port}"
 
-    def run(self, **kwargs: ArgumentType) -> ToolRunResult:
+    def run(self, **kwargs: ArgumentType) -> ToolResult:
         response = self.http_client.post(f"{self.url}/run", json=kwargs)
-        return ToolRunResult.model_validate_json(response.text)
+        return ToolResult.model_validate_json(response.text)
 
     def is_alive(self) -> bool:
         try:

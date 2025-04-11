@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import hashlib
 import tempfile
-from dataclasses import dataclass
 from pathlib import Path
+from typing import Self
 
 import dotenv
 import yaml
@@ -11,14 +11,19 @@ from docker.models.images import Image
 from loguru import logger
 from pydantic import BaseModel, ConfigDict
 
-from toolarena.definition import Invocation, TaskDefinition
-from toolarena.runtime import DockerRuntimeClient, Mounts, build_image
-from toolarena.types import ToolRunResult
+from toolarena.definition import ToolDefinition, ToolInvocation
+from toolarena.runtime import (
+    DockerRuntimeClient,
+    Mounts,
+    ToolResult,
+    ToolRunResult,
+    build_image,
+)
 from toolarena.utils import RUNS_DIR
 
 
 def build_tool(
-    definition: TaskDefinition, install_script: str, code_implementation: str
+    definition: ToolDefinition, install_script: str, code_implementation: str
 ) -> ToolImplementation:
     environment = definition.repo.resolve_env()
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -44,35 +49,47 @@ def build_tool(
 
 
 class ToolImplementation(BaseModel):
-    definition: TaskDefinition
+    definition: ToolDefinition
     image: Image
     install_script: str
     code_implementation: str
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    def run(self, invocation: Invocation, data_dir: Path) -> ToolRunResult:
+    def run(self, invocation: ToolInvocation, data_dir: Path) -> ToolResult:
         return ToolRunner(
             definition=self.definition,
-            invocation=InvocationWithData(**invocation.model_dump(), data_dir=data_dir),
+            invocation=invocation,
+            data_dir=data_dir,
             install_script=self.install_script,
             code_implementation=self.code_implementation,
         ).run(self.image)
 
 
-class ToolRunResultWithOutput(ToolRunResult):
-    output_dir: Path
-
-
-class InvocationWithData(Invocation):
-    data_dir: Path
-
-
 class ToolRunner(BaseModel):
-    definition: TaskDefinition
-    invocation: InvocationWithData
+    definition: ToolDefinition
+    invocation: ToolInvocation
+    data_dir: Path
     install_script: str
     code_implementation: str
     _cache_root: Path = RUNS_DIR
+
+    @classmethod
+    def from_paths(
+        cls,
+        *,
+        task_file: Path,
+        invocation: ToolInvocation,
+        data_dir: Path,
+        install_script: Path,
+        code_implementation: Path,
+    ) -> Self:
+        return cls(
+            definition=ToolDefinition.from_yaml(task_file),
+            invocation=invocation,
+            data_dir=data_dir,
+            install_script=install_script.read_text(),
+            code_implementation=code_implementation.read_text(),
+        )
 
     def hash(self) -> str:
         return hashlib.sha256(self.model_dump_json().encode("utf-8")).hexdigest()
@@ -93,12 +110,19 @@ class ToolRunner(BaseModel):
     def cache_file(self) -> Path:
         return self.run_dir / "result.json"
 
-    def run_without_cache(self, image: Image) -> ToolRunResult:
-        """Build image and run tool without using cache."""
+    def run_without_cache(self, image: Image | None = None) -> ToolResult:
+        """Run tool without using cache. If image is not provided, build it."""
+        if image is None:
+            logger.debug("Image not provided, building it")
+            image = build_tool(
+                definition=self.definition,
+                install_script=self.install_script,
+                code_implementation=self.code_implementation,
+            ).image
         mounts = Mounts(
             input=self.input_dir,
             output=self.output_dir,
-            data_dir=self.invocation.data_dir,
+            data_dir=self.data_dir,
             input_mapping=self.invocation.mount,
         )
         mounts.setup()
@@ -107,7 +131,7 @@ class ToolRunner(BaseModel):
         )
         return client.run(**self.invocation.arguments)
 
-    def run(self, image: Image) -> ToolRunResultWithOutput:
+    def run(self, image: Image | None = None) -> ToolRunResult:
         """Build image and run tool, using cache if available."""
         if self.is_cached():
             return self.read_cache()
@@ -115,7 +139,7 @@ class ToolRunner(BaseModel):
         self.write_cache(result)
         return self.read_cache()
 
-    def write_cache(self, result: ToolRunResult):
+    def write_cache(self, result: ToolResult):
         self.run_dir.mkdir(parents=True, exist_ok=True)
         self.cache_file.write_text(result.model_dump_json(indent=2))
         self.run_dir.joinpath("install.sh").write_text(self.install_script)
@@ -124,14 +148,12 @@ class ToolRunner(BaseModel):
             yaml.dump(self.definition.model_dump())
         )
 
-    def read_cache(self) -> ToolRunResultWithOutput:
+    def read_cache(self) -> ToolRunResult:
         logger.debug(
             f"Retrieving cached result for {self.definition.name} at {self.cache_file}"
         )
-        return ToolRunResultWithOutput(
-            **ToolRunResult.model_validate_json(
-                self.cache_file.read_text()
-            ).model_dump(),
+        return ToolRunResult(
+            **ToolResult.model_validate_json(self.cache_file.read_text()).model_dump(),
             output_dir=self.output_dir,
         )
 

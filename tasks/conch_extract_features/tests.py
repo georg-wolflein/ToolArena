@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 from pytest_lazy_fixtures import lf
 from tasks.utils import initialize, parametrize_invocation
-from toolarena.types import ToolRunResult
+from toolarena.run import ToolRunResult
 
 initialize()
 
