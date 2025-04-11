@@ -34,7 +34,8 @@ def _build_tool_image(
         temp_dir_path.joinpath(".env").touch()
         for key, value in environment.items():
             dotenv.set_key(temp_dir_path / ".env", key, value)
-        return build_image(tag=definition.name, context=temp_dir_path)
+        image, logs = build_image(tag=definition.name, context=temp_dir_path)
+        return image
 
 
 class ToolRunResultWithOutput(ToolRunResult):

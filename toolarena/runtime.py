@@ -8,7 +8,7 @@ import sys
 from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Final, Self, Sequence, cast
+from typing import Final, Iterator, Self, Sequence, cast
 
 import docker
 import httpx
@@ -142,7 +142,7 @@ def build_image(
     tag: str,
     context: Path | str,
     dockerfile: Path | str = TOOL_DOCKERFILE,
-) -> Image:
+) -> tuple[Image, Iterator[Mapping[str, str]]]:
     """Build an image using Docker BuildKit via the low-level Docker API.
 
     The implementation follows the implementation of `DockerClient.images.build()`.
@@ -153,7 +153,10 @@ def build_image(
         path=str(context),
         dockerfile=str(dockerfile),
         tag=f"{repository}:{tag}",
-        buildargs={"DOCKER_BUILDKIT": "1"},
+        buildargs={
+            "DOCKER_BUILDKIT": "1",
+            # "BUILDKIT_PROGRESS": "plain",
+        },
     )
 
     if isinstance(resp, str):
@@ -162,7 +165,6 @@ def build_image(
     image_id = None
     internal_stream, result_stream = itertools.tee(json_stream(resp))
     for chunk in internal_stream:
-        print(chunk)
         if "error" in chunk:
             logger.error(f"Build error: {chunk['error']}")
             raise BuildError(chunk["error"], result_stream)
@@ -176,7 +178,7 @@ def build_image(
         last_event = chunk
     if image_id:
         logger.info(f"Built image {repository}:{tag} using Docker BuildKit")
-        return get_docker().images.get(image_id)
+        return get_docker().images.get(image_id), result_stream
     raise BuildError(last_event or "Unknown", result_stream)
 
 

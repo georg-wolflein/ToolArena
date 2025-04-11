@@ -1,6 +1,5 @@
+# This image is published to ghcr.io/georg-wolflein/toolarena-runtime
 FROM python:3.12
-
-SHELL ["/bin/bash", "-c"]
 
 WORKDIR /toolarena
 
