@@ -27,3 +27,7 @@ VOLUME /mount/input
 VOLUME /mount/output
 
 ENV WORKSPACE_DIR=/workspace
+ENV HOST=0.0.0.0
+ENV PORT=8000
+
+CMD /toolarena/.venv/bin/uvicorn --app-dir /toolarena --host ${HOST} --port ${PORT} toolarena.server:app
