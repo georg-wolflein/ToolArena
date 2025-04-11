@@ -9,7 +9,7 @@ from fastapi import FastAPI
 from loguru import logger
 
 from toolarena.definition import ToolDefinition
-from toolarena.types import ToolRunResult
+from toolarena.run import ToolResult
 
 RUNTIME_DIR = Path(os.getenv("WORKSPACE_DIR", "/workspace"))
 TOOLARENA_DIR = Path(os.getenv("TOOLARENA_DIR", "/toolarena"))
@@ -32,7 +32,7 @@ async def alive():
     return {"status": "ok"}
 
 
-async def run(args: task_definition.args_to_pydantic()) -> ToolRunResult:  # type: ignore
+async def run(args: task_definition.args_to_pydantic()) -> ToolResult:  # type: ignore
     function_name = task_definition.name
     logger.info(f"Running {function_name} with args: {args}")
     id = uuid4()
@@ -71,7 +71,7 @@ async def run(args: task_definition.args_to_pydantic()) -> ToolRunResult:  # typ
         except UnicodeDecodeError:
             print(chunk, end="")
     return_code = await process.wait()
-    response = ToolRunResult(
+    response = ToolResult(
         return_code=return_code,
         result=json.loads(output_path.read_text())["result"]
         if output_path.exists()
