@@ -1,19 +1,16 @@
 # This image is published to ghcr.io/georg-wolflein/toolarena-runtime
 FROM python:3.12
 
+# Install uv
+COPY --from=ghcr.io/astral-sh/uv:0.6 /uv /uvx /bin/
+
 WORKDIR /toolarena
 
 COPY pyproject.toml uv.lock ./
 
-RUN python -m pip install uv && \
-    uv venv && \
-    uv sync
+RUN uv sync
 
 COPY toolarena ./toolarena
-
-RUN python -m pip install uv && \
-    uv venv && \
-    uv sync
 
 RUN mkdir -p /workspace
 WORKDIR /workspace
