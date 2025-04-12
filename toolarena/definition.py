@@ -74,7 +74,7 @@ class Repository(BaseModel):
 class ToolDefinition(BaseSettings):
     name: str
     repo: Repository
-    papers: Mapping[str, str]
+    papers: Sequence[str]
     category: str
     description: str
     arguments: Mapping[str, ArgumentDefinition]

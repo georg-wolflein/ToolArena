@@ -48,3 +48,10 @@ dev = [
 "__init__.py" = ["F401"]  # Ignore `F401` (import violations) in all `__init__.py` files
 "*.py" = ["E501"]  # Ignore `E501` (line too long) in all files
 "*.ipynb" = ["E501"]  # Ignore `E501` (line too long) in all notebooks
+
+[project.scripts]
+toolarena = "toolarena.__main__:app"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

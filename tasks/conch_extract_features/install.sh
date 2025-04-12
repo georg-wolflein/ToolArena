@@ -1,3 +1,4 @@
+#! /bin/bash
 set -e
 
 git clone https://github.com/mahmoodlab/CONCH /workspace/CONCH
