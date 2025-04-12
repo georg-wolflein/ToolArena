@@ -8,7 +8,7 @@ WORKDIR /toolarena
 
 COPY pyproject.toml uv.lock README.md ./
 
-RUN uv sync
+RUN uv sync --frozen --no-install-project
 
 COPY toolarena ./toolarena
 
