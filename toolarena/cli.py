@@ -4,9 +4,13 @@ from typing import Annotated
 
 import typer
 from loguru import logger
+from rich import print
+from rich.panel import Panel
+from rich.pretty import Pretty
+from rich.text import Text
 
 from toolarena.definition import ToolDefinition
-from toolarena.run import ToolImplementation
+from toolarena.run import ToolImplementation, ToolRunner
 from toolarena.utils import RUNS_DIR, TASKS_DIR, TEMPLATE_DIR
 
 app = typer.Typer()
@@ -70,12 +74,6 @@ def build(
             help="Path to the folder where the implementation is stored (optional, default use the implementation in the task directory). This folder should contain an install.sh script and a implementation.py file."
         ),
     ] = None,
-    shell: Annotated[
-        bool,
-        typer.Option(
-            help="After building the tool, start a shell in the built container"
-        ),
-    ] = False,
 ) -> ToolImplementation:
     """Build a tool."""
     task_dir = TASKS_DIR / name
@@ -88,7 +86,7 @@ def build(
         ).read_text(),
     )
     print(
-        f"To start an interactive shell, run: `docker run -it --rm {image.image.short_id} /bin/bash`"
+        f"To start an interactive shell, run: [bold]docker run -it --rm {image.image.tags[0]} /bin/bash[/bold]"
     )
     return image
 
@@ -137,7 +135,72 @@ def run(
         result = tool.run(
             invocation, data_dir=TASKS_DIR / name / "data", cache_root=cache
         )
+        status_style = "green" if result.status == "success" else "red"
         print(
-            f"Tool {name} invocation {invocation_name} finished with status {result.status}"
+            f"Tool [bold]{name}[/bold] invocation [bold]{invocation_name}[/bold] finished with status {Text(result.status, style=f'bold {status_style}').markup}"
         )
-        print(result.result)
+        print(
+            Panel(
+                Text(result.stdout),
+                title="Standard output",
+                title_align="left",
+                border_style=status_style,
+            )
+        )
+        print(
+            Panel(
+                Text(repr(result.result)),
+                title="Result",
+                title_align="left",
+                border_style=status_style,
+            )
+        )
+
+
+@app.command()
+def debug(
+    name: Annotated[str, typer.Argument(help="The name of the tool")],
+    implementation: Annotated[
+        Path | None,
+        typer.Argument(
+            help="Path to the folder where the implementation is stored (optional, default use the implementation in the task directory). This folder should contain an install.sh script and a implementation.py file."
+        ),
+    ] = None,
+    invocation: Annotated[
+        str,
+        typer.Argument(
+            help="The invocation to run (optional, default run example invocation)"
+        ),
+    ] = "example",
+) -> None:
+    """Debug a tool."""
+    task_dir = TASKS_DIR / name
+    implementation_dir = implementation or task_dir
+    task_file = task_dir / "task.yaml"
+    definition = ToolDefinition.from_yaml(task_file)
+    runner = ToolRunner.from_paths(
+        task_file=task_file,
+        invocation=definition.example
+        if invocation is None or invocation == "example"
+        else definition.test_invocations[invocation],
+        data_dir=task_dir / "data",
+        install_script=implementation_dir / "install.sh",
+        code_implementation=implementation_dir / "implementation.py",
+    )
+    client = runner.start_client()
+
+    print(
+        Panel.fit(
+            f"""\
+To [green]start[/green] an interactive shell, run: [bold]docker exec -it {client.name} /bin/bash[/bold].
+To [red]stop[/red] the container, run: [bold]docker stop {client.name}[/bold].
+To [red]remove[/red] the container, run: [bold]docker rm {client.name}[/bold].
+
+You can [blue link=https://code.visualstudio.com/docs/devcontainers/attach-container]attach[/blue link] VS Code to this container as follows:
+1. Install the [italic link=https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers]Dev Containers[/italic link] extension.
+2. Open the Command Palette ([italic]Ctrl+Shift+P[/italic] or [italic]Cmd+Shift+P[/italic] on Mac).
+3. Search for [italic]Dev Containers: Attach to Running Container...[/italic]
+4. Select the container [bold]{client.name}[/bold] to attach to it.""",
+            title=f"""Container [bold]{client.name}[/bold] [green]started[/green]""",
+        )
+    )

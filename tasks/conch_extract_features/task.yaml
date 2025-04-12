@@ -5,8 +5,7 @@ repo:
   commit: 171f2be
   env:
     HF_TOKEN: "${env:HF_TOKEN}"  # required for downloading models
-papers:
-  lu2024conch: "https://www.nature.com/articles/s41591-024-02856-4"
+papers: [lu2024conch]
 category: pathology
 description: Perform feature extraction on an input image using CONCH.
 arguments:

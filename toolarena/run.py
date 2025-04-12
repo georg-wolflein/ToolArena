@@ -117,8 +117,8 @@ class ToolRunner(BaseModel):
     def cache_file(self) -> Path:
         return self.run_dir / "result.json"
 
-    def run_without_cache(self, image: Image | None = None) -> ToolResult:
-        """Run tool without using cache. If image is not provided, build it."""
+    def start_client(self, image: Image | None = None) -> DockerRuntimeClient:
+        """Start a client for the tool. If image is not provided, build it."""
         if image is None:
             logger.debug("Image not provided, building it")
             image = build_tool(
@@ -133,9 +133,16 @@ class ToolRunner(BaseModel):
             input_mapping=self.invocation.mount,
         )
         mounts.setup()
-        client = DockerRuntimeClient.create(
-            name=self.definition.name, image=image, mounts=mounts
+        return DockerRuntimeClient.create(
+            name=self.definition.name,
+            image=image,
+            mounts=mounts,
+            env=self.definition.repo.resolve_env(),
         )
+
+    def run_without_cache(self, image: Image | None = None) -> ToolResult:
+        """Run tool without using cache. If image is not provided, build it."""
+        client = self.start_client(image)
         return client.run(**self.invocation.arguments)
 
     def run(self, image: Image | None = None) -> ToolRunResult:
