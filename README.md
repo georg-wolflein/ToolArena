@@ -39,12 +39,13 @@ Each task is in a subfolder therein, and its task definition is available at `ta
 A candidate implementation must consist of two files:
 1. A bash script, `install.sh`, which installs all necessary dependencies for the tool (including cloning the associated repository)
 2. A Python file, `implementation.py`, containing the Python implementation of the task. This file must define a function with the correct signature according to the task definition in `task.yaml`.
-   > [!NOTE]
-   > To see how the signature of the candidate implementation function should look like, simply run:
-   > ```bash
-   > toolarena signature $TASK
-   > ```
-   > where `$TASK` is the name of the task in question.
+
+> [!NOTE]
+> To see how the signature of the candidate implementation function should look like, simply run:
+> ```bash
+> toolarena signature $TASK
+> ```
+> where `$TASK` is the name of the task in question.
 
 You should create an *implementation directory* where you store candidate implementations for the tasks. The directory structure will look as follows:
 ```
