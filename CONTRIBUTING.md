@@ -133,6 +133,29 @@ At this point, you should at least define the following parts (the `config.yaml`
 4. **`arguments`**: inputs your tool expects.
 5. **`returns`**: outputs your tool produces.
 
+> [!NOTE]  
+> In the `env` section of `repo`, you can define environment variables that should be set for the tool.
+> For example, to set the environment variable MY_ENV_VAR to the value "abc", you would write:
+> ```yaml
+> repo:
+>   env:
+>     MY_ENV_VAR: "abc"
+> ``` 
+> The main use case for environment variables is to supply **secret tokens** such as API keys. For this, you may use a special syntax (`"${env:MY_TOKEN}"`) to insert environment variables from your *local environment*, defined in the top-level `.env` file.
+> For example, if you set the following in your `.env` file:
+> > **`.env`:**
+> > ```bash
+> > HF_TOKEN=my_huggingface_token
+> > ```
+> Then you can tell ToolArena that the local `HF_TOKEN` environment variable defined in `.env` should be available to the tool as an environment variable, also named `HF_TOKEN`:
+> > **`tasks/my_nifty_task/task.yaml`:**
+> > ```yaml
+> > repo:
+> >   env:
+> >     HF_TOKEN: "${env:HF_TOKEN}"
+> > ``` 
+
+
 ## 5. Add data required to run the task
 If your task requires external data as input, add these files to the `data/` folder within your task. You may place any files / datasets in there that your tool requires as input for the example invocation or for the tests later on.
 
@@ -224,7 +247,7 @@ This file must define **one function** whose name matches `name` in `task.yaml` 
 
 > **Example:**
 > ```python
-> def mynifty_task(a: float) -> dict:
+> def my_nifty_task(a: float) -> dict:
 >     """
 >     Round the input to the nearest integer.
 >
