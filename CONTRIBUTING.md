@@ -42,14 +42,18 @@ When you create a new task, you place these files in a directory under `tasks/`.
 ## Table of Contents
 
 1. [Fork the repository](#1-fork-the-repository)
-2. [Create a new task folder](#2-create-a-new-task-folder)
-3. [Fill in your `task.yaml`](#3-fill-in-your-taskyaml)
-4. [Write `install.sh`](#4-write-installsh)
-5. [Write `implementation.py`](#5-write-implementationpy)
-6. [Add test coverage (optional but recommended)](#6-add-test-coverage-optional-but-recommended)
-7. [Run and verify your new task locally](#7-run-and-verify-your-new-task-locally)
-8. [Submit a pull request](#8-submit-a-pull-request)
-9. [Tips and best practices](#9-tips-and-best-practices)
+2. [Install ToolArena](#2-install-toolarena)
+3. [Create a new task](#3-create-a-new-task)
+4. [Fill in your task definition (`task.yaml`)](#4-fill-in-your-task-definition-taskyaml)
+5. [Add data required to run the task](#5-add-data-required-to-run-the-task)
+6. [Define the example invocation](#6-define-the-example-invocation)
+7. [Generate `install.sh` and `implementation.py`](#7-generate-installsh-and-implementationpy)
+8. [Write the `install.sh` script](#8-write-the-installsh-script)
+9. [Write `implementation.py`](#9-write-implementationpy)
+10. [Check that the example invocation works](#10-check-that-the-example-invocation-works)
+11. [Write tests](#11-write-tests)
+12. [Run your tests](#12-run-your-tests)
+13. [Tips and best practices](#tips-and-best-practices)
 
 ---
 
@@ -265,7 +269,7 @@ Then, write unit tests for these invocations. You can use the unit tests at [`ta
 > toolarena run my_nifty_tool my_invocation  # (replace `my_invocation` with the name of the invocation which you provided in `task.yaml`)
 > ```
 
-## 12. Run you tests
+## 12. Run your tests
 Run the tests for your tool using the following command, and check that they all pass for your implementation:
 ```bash
 pytest tasks/my_nifty_task
@@ -283,4 +287,3 @@ pytest tasks/my_nifty_task
 ---
 
 Thank you for contributing to ToolArena! Feel free to reach out via GitHub Issues if you have any questions.
-
