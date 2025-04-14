@@ -251,9 +251,14 @@ Check that the result and standard output are as expected for your task.
 If there is an error, you should modify the `install.sh` and/or `implementation.py` files to work correctly, and then re-run the `toolarena run my_nifty_example example` command.
 
 > [!TIP]  
-> In most cases, it is sufficient to use the above command (`toolarena run my_nifty_task example`) and edit the `install.sh` and `implementation.py` files if there are errors.
->
-> However, you can also attach VS Code to your task's Docker container by running:
+> If your tool takes very long to run, you can inspect the output by running the following in a separate shell:
+> ```bash
+> docker logs -f my_nifty_tool
+> ```
+> This will show you the standard output of your tool while it is running.
+
+> [!TIP]  
+> You can also attach VS Code to your task's Docker container by running:
 > ```bash
 > toolarena debug my_nifty_task example
 > ```
