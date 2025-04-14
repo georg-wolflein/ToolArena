@@ -25,18 +25,18 @@ When you create a new task, you place these files in a directory under `tasks/`.
 > This guide will walk you through creating all the necessary files to define a task. By the end of this guide, you will have produced the following directory structure:
 > ```
 > tasks/
->  └─ my_nifty_task/
->      ├─ __init__.py
->      ├─ task.yaml
->      ├─ install.sh
->      ├─ implementation.py
->      ├─ tests.py
->      └─ data/
->          ├─ .gitignore
->          ├─ download.sh  # (optional script to download external data)
->          ├─ ...          # (optional) (your data files)
->          └─ tests/
->              └─ ...      # (optional) (additional data files for tests)
+>   └── my_nifty_task/
+>       ├── __init__.py
+>       ├── task.yaml
+>       ├── install.sh
+>       ├── implementation.py
+>       ├── tests.py
+>       └── data/
+>           ├── .gitignore
+>           ├── download.sh  # (optional script to download external data)
+>           ├── ...          # (optional) (your data files)
+>           └── tests/
+>               └── ...      # (optional) (additional data files for tests)
 
 ---
 
@@ -97,12 +97,12 @@ This will create a new task at `tasks/my_nifty_task` with a `task.yaml` file to 
 > Your directory structure will now look as follows:
 > ```
 > tasks/
->  └─ my_nifty_task/
->      ├─ __init__.py  # (empty file)
->      ├─ task.yaml
->      └─ data/
->          ├─ .gitignore
->          └─ download.sh
+>   └── my_nifty_task/
+>       ├── __init__.py  # (empty file)
+>       ├── task.yaml
+>       └── data/
+>           ├── .gitignore
+>           └── download.sh
 > ```
 
 ## 4. Fill in your task definition (`task.yaml`)
@@ -167,13 +167,13 @@ If your task requires large files (e.g. larger than a few MB), please add these 
 > Your directory structure will now look as follows:
 > ```
 > tasks/
->  └─ my_nifty_task/
->      ├─ __init__.py
->      ├─ task.yaml
->      └─ data/
->          ├─ .gitignore
->          ├─ download.sh
->          └─ ...  # your data files
+>   └── my_nifty_task/
+>       ├── __init__.py
+>       ├── task.yaml
+>       └── data/
+>           ├── .gitignore
+>           ├── download.sh
+>           └── ...  # your data files
 > ```
 
 ## 6. Define the example invocation
@@ -188,15 +188,15 @@ toolarena generate my_nifty_tool
 > Now, your folder structure will look like this:
 > ```
 > tasks/
->  └─ my_nifty_task/
->      ├─ __init__.py
->      ├─ task.yaml
->      ├─ implementation.py
->      ├─ install.sh
->      └─ data/
->          ├─ .gitignore
->          ├─ download.sh
->          └─ ...  # your data files
+>   └── my_nifty_task/
+>       ├── __init__.py
+>       ├── task.yaml
+>       ├── implementation.py
+>       ├── install.sh
+>       └── data/
+>           ├── .gitignore
+>           ├── download.sh
+>           └── ...  # your data files
 > ```
 
 Importantly, ToolArena will automatically place starter code in the `implementation.py` file. 
