@@ -82,6 +82,10 @@ When you create a new task, you place these files in a directory under `tasks/`.
    ```bash
    toolarena --help
    ```
+5. Install [Docker](https://docs.docker.com/desktop) and pull the latest ToolArena image:
+   ```bash
+   docker pull ghcr.io/georg-wolflein/toolarena:main
+   ```
 
 ## 3. Create a new task
 

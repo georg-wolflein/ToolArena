@@ -18,6 +18,10 @@ Please see [CONTRIBUTING.md](CONTRIBUTING.md) for instructions on how to contrib
    ```bash
    toolarena --help
    ```
+5. Install [Docker](https://docs.docker.com/desktop) and pull the latest ToolArena image:
+   ```bash
+   docker pull ghcr.io/georg-wolflein/toolarena:main
+   ```
 
 ### Environment setup
 At the root of this repository, create a `.env` file with the following contents:
