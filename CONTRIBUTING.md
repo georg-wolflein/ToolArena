@@ -74,11 +74,11 @@ When you create a new task, you place these files in a directory under `tasks/`.
    uv sync --all-groups
    ```
    This will create a virtual environment at `.venv/`.
-3. Activate the cirtual environment:
+3. Activate the virtual environment:
    ```bash
    ./venv/bin/activate
    ```
-4. Check that the installation succeeded by verifyingn that the `toolarena` command exists:
+4. Check that the installation succeeded by verifying that the `toolarena` command exists:
    ```bash
    toolarena --help
    ```
@@ -135,7 +135,7 @@ At this point, you should at least define the following parts (the `config.yaml`
 
 > [!NOTE]  
 > In the `env` section of `repo`, you can define environment variables that should be set for the tool.
-> For example, to set the environment variable MY_ENV_VAR to the value "abc", you would write:
+> For example, to set the environment variable `MY_ENV_VAR` to the value `"abc"`, you would write:
 > ```yaml
 > repo:
 >   env:

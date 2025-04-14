@@ -11,7 +11,7 @@ type InvocationFixture = Callable[[ToolFixture], ToolRunResult]
 
 def pytest_addoption(parser):
     parser.addoption(
-        "--candidate-impl",
+        "--implementation",
         action="store",
         default=None,
         help="Path to the root folder with candidate implementations",
@@ -36,10 +36,10 @@ def candidate_impl_dir(request) -> Path:
           install.sh
           implementation.py
     """
-    path_str = request.config.getoption("--candidate-impl")
+    path_str = request.config.getoption("--implementation")
     if not path_str:
         path_str = Path(__file__).parent  # use tasks/ folder as default
     path = Path(path_str).resolve()
     if not path.is_dir():
-        raise ValueError(f"Candidate impl directory does not exist: {path}")
+        raise ValueError(f"Candidate implementation directory does not exist: {path}")
     return path
