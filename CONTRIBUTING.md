@@ -289,6 +289,8 @@ pytest tasks/my_nifty_task
 ## 13. Submit a Pull Request!
 Nice work, you have successfully created a new task for the ToolArena benchmark. Now, open a [new Pull Request](https://github.com/georg-wolflein/ToolArena/pulls) on GitHub to submit this task!
 
+Check out [this PR](https://github.com/georg-wolflein/ToolArena/pull/1) as an example.
+
 ## Tips and best practices
 
 - **Pin your dependencies** to ensure reproducibility
