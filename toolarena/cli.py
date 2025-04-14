@@ -6,7 +6,6 @@ import typer
 from loguru import logger
 from rich import print
 from rich.panel import Panel
-from rich.pretty import Pretty
 from rich.text import Text
 
 from toolarena.definition import ToolDefinition
@@ -46,7 +45,6 @@ def generate(name: Annotated[str, typer.Argument(help="The name of the tool")]) 
 
     code_file = task_dir / "implementation.py"
     install_script = task_dir / "install.sh"
-    tests_file = task_dir / "tests.py"
 
     if not code_file.exists():
         code_file.write_text(definition.python_signature)
@@ -59,9 +57,6 @@ def generate(name: Annotated[str, typer.Argument(help="The name of the tool")]) 
             f"# Insert commands here to install dependencies and setup the environment...\n"
         )
         logger.info(f"Created {install_script}")
-    if not tests_file.exists():
-        tests_file.write_text("import pytest\n")
-        logger.info(f"Created {tests_file}")
     print("Done!")
 
 

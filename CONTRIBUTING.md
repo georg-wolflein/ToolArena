@@ -22,7 +22,7 @@ Each task in ToolArena consists of:
 
 When you create a new task, you place these files in a directory under `tasks/`. For example, if your task is named `my_nifty_task`, your files would live under `tasks/my_nifty_task/`.
 
-> This guide will walk you through creating all the necessary files to define a task. At the end of this guide, you will have produced the following directory structure:
+> This guide will walk you through creating all the necessary files to define a task. By the end of this guide, you will have produced the following directory structure:
 > ```
 > tasks/
 >  └─ my_nifty_task/
@@ -31,10 +31,11 @@ When you create a new task, you place these files in a directory under `tasks/`.
 >      ├─ implementation.py
 >      ├─ tests.py
 >      └─ data/
+>          ├─ .gitignore
 >          ├─ download.sh  # (optional script to download external data)
->          ├─ ...  # (your data files)
+>          ├─ ...          # (optional) (your data files)
 >          └─ tests/
->              └─ ...  # (optional additional data files for tests)
+>              └─ ...      # (optional) (additional data files for tests)
 
 ---
 
@@ -83,15 +84,16 @@ Use the following command to create a new task:
 ```bash
 toolarena init my_nifty_task
 ```
-This will create a new task at `tasks/my_nifty_task` with the following files to get you started:
-```
-tasks/
- └─ my_nifty_task/
-     ├─ task.yaml
-     ├─ tests.py
-     └─ data/
-         └─ download.sh
-```
+This will create a new task at `tasks/my_nifty_task` with a `task.yaml` file to get you started, alongside a `data/` directory which you will later use to store data files necessary for your task.
+> Your directory structure will now look as follows:
+> ```
+> tasks/
+>  └─ my_nifty_task/
+>      ├─ task.yaml
+>      └─ data/
+>          ├─ .gitignore
+>          └─ download.sh
+> ```
 
 ## 4. Fill in your task definition (`task.yaml`)
 
@@ -109,7 +111,7 @@ Take special care to come up with a task `description`, and make sure all `argum
 > You can use an existing task in `tasks/` as a reference (for instance, [`tasks/conch_extract_features/task.yaml`](tasks/conch_extract_features/task.yaml)).
 
 ### Key sections to include
-At this point, you should at least define the following parts:
+At this point, you should at least define the following parts (the `config.yaml` file includes extensive documentation in the form of comments to help you):
 1. **`name`**: matches the folder name (e.g., `mynifty_task`).
 2. **`description`**: One or two sentences describing what your tool does.
 3. **`repo`**: your should wrap functionality from a GitHub repository, so please specify:
@@ -124,3 +126,161 @@ At this point, you should at least define the following parts:
    ```
 4. **`arguments`**: inputs your tool expects.
 5. **`returns`**: outputs your tool produces.
+
+## 5. Add data required to run the task
+If your task requires external data, add these files to the `data/` folder within your task. You may place any files / datasets in there that your tool requires as input for the example invocation or for the tests later on.
+
+If your task requires large files (e.g. larger than a few MB), please add these files to the `data/.gitignore` file and add commands in the `data/download.sh` script so they can be downloaded by the user of the benchmark.
+> Your directory structure will now look as follows:
+> ```
+> tasks/
+>  └─ my_nifty_task/
+>      ├─ task.yaml
+>      └─ data/
+>          ├─ .gitignore
+>          ├─ download.sh
+>          └─ ...  # your data files
+> ```
+
+## 6. Define the example invocation
+In the `example` section of `task.yaml`, define an *example invocation* by providing a concrete value for each input argument.
+Later on, you will verify that your tool implementation works by calling your tool using this example invocation.
+
+## 7. Generate `install.sh` and `implementation.py`
+ToolArena provides an automated mechanism to generate starter code in the files needed for the implementation:
+```bash
+toolarena generate my_nifty_tool
+```
+> Now, your folder structure will look like this:
+> ```
+> tasks/
+>  └─ my_nifty_task/
+>      ├─ task.yaml
+>      ├─ implementation.py
+>      ├─ install.sh
+>      └─ data/
+>          ├─ .gitignore
+>          ├─ download.sh
+>          └─ ...  # your data files
+> ```
+
+Importantly, ToolArena will automatically place starter code in the `implementation.py` file. 
+This code contains the Python function signature of the task you defined in `task.yaml`.
+
+> [!CAUTION]  
+> If you need to change the `description`, `arguments` or `returns` in your `task.yaml`, be sure to re-generate the Python function signature and update it in `implementation.py`:
+> ```bash
+> toolarena signature my_nifty_task
+> ```
+
+## 8. Write the `install.sh` script
+Now, write the `install.sh` script to install all necessary dependencies for your tool.
+The `toolarena generate` command which you executed earlier will already include the `git clone` command in your install script to get you started.
+
+To try out the install script, simply run:
+```bash
+toolarena build my_nifty_task
+```
+
+This will create a Docker image using your `install.sh` script to install all dependencies.
+If this succeeds without errors, you can start an interactive shell in a container based on this image using:
+```bash
+docker run -it --rm my_nifty_task /bin/bash
+```
+
+> [!TIP]  
+> You can just start with an empty `install.sh` file including just the `git clone` command, and then run:
+> ```bash
+> toolarena build my_nifty_task
+> docker run -it --rm my_nifty_task /bin/bash
+> ```
+> In the interactive shell, you can just run the commands you need in order to install all the dependencies.
+> Simply take note of the commands you ran and put them in the `install.sh` file!
+
+> **Example:**
+> ```bash
+> #! /bin/bash
+> set -e
+>
+> git clone https://github.com/username/MyRepo /workspace/MyRepo
+> cd /workspace/MyRepo && git checkout abc123
+>
+> apt-get install somepackage
+> pip install -e /workspace/MyRepo
+> pip install someotherpackage
+> ```
+
+## 9. Write `implementation.py`
+
+This file must define **one function** whose name matches `name` in `task.yaml` and arguments are as defined in `task.yaml`.
+
+> **Example:**
+> ```python
+> def mynifty_task(a: float) -> dict:
+>     """
+>     Round the input to the nearest integer.
+>
+>     Args:
+>         a: the number to be rounded
+> 
+>     Returns:
+>         dict with the following structure:
+>         {
+>           'rounded': int  # The rounded number
+>         }
+>     """
+>
+>     import math # Note: we're importing modules inside the function, not globally!
+>     rounded = int(math.round(a))
+>     return {"rounded": rounded}
+> ```
+
+> [!NOTE]  
+> Do **not** define imports globally; instead put your import statements in the body of the function, as shown in the example above.
+
+> [!TIP]  
+> You can attach VS Code to your task's Docker container by running:
+> ```bash
+> toolarena debug my_nifty_task example
+> ```
+> This will start a docker container for the `example` invocation (specified in the `example` section of `task.yaml`). This command will provide instructions on how to attach VS code to the container.
+
+## 10. Check that the example invocation works
+To check that the example invocation runs as expected, run the following command:
+```bash
+toolarena run my_nifty_example example
+```
+Check that the result and standard output are as expected for your task.
+If there is an error, you should modify the `install.sh` and/or `implementation.py` files to work correctly, and then re-run the `toolarena run my_nifty_example example` command.
+
+## 11. Write tests
+Define 2-3 test invocations in the `invocation` section of `task.yaml`.
+These invocations are defined similarly to how you defined the `example` invocation.
+
+Then, write unit tests for these invocations. You can use the unit tests at [`tasks/conch_extract_features/tests.py`](tasks/conch_extract_features/tests.py) (or any of the other tasks) as an example how to define these tests.
+
+> [!TIP]  
+> You can see the outputs that your tool implementation produces for each of your test invocations by running:
+> ```bash
+> toolarena run my_nifty_tool my_invocation  # (replace `my_invocation` with the name of the invocation which you provided in `task.yaml`)
+> ```
+
+## 12. Run you tests
+Run the tests for your tool using the following command, and check that they all pass for your implementation:
+```bash
+pytest tasks/my_nifty_task
+```
+
+## Tips and best practices
+
+- **Pin your dependencies** to ensure reproducibility
+- **Use specific commits** for GitHub repos instead of floating branches
+- **Minimize storage**: Avoid checking in large data files
+- **Use env vars** like `HF_TOKEN` for secure model downloading
+- **Refer to existing tasks** as examples if unsure
+- **Try to write at least 2-3 test cases** to validate outputs
+
+---
+
+Thank you for contributing to ToolArena! Feel free to reach out via GitHub Issues if you have any questions.
+
