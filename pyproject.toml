@@ -44,6 +44,9 @@ dev = [
     "types-docker>=7.1.0.20241229",
     "types-pyyaml>=6.0.12.20241230",
 ]
+benchmark = [
+    "h5py>=3.13.0",
+]
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]  # Ignore `F401` (import violations) in all `__init__.py` files

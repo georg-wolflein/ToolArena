@@ -70,7 +70,7 @@ When you create a new task, you place these files in a directory under `tasks/`.
 1. Install [`uv`](https://docs.astral.sh/uv/getting-started/installation/).
 2. Install this project in a virtual environment:
    ```bash
-   uv sync
+   uv sync --all-groups
    ```
    This will create a virtual environment at `.venv/`.
 3. Activate the cirtual environment:
