@@ -53,7 +53,7 @@ When you create a new task, you place these files in a directory under `tasks/`.
 10. [Check that the example invocation works](#10-check-that-the-example-invocation-works)
 11. [Write tests](#11-write-tests)
 12. [Run your tests](#12-run-your-tests)
-13. [Tips and best practices](#tips-and-best-practices)
+13. [Submit a Pull Request!](#13-submit-a-pull-request)
 
 ---
 
@@ -276,6 +276,9 @@ Run the tests for your tool using the following command, and check that they all
 ```bash
 pytest tasks/my_nifty_task
 ```
+
+## 13. Submit a Pull Request!
+Nice work, you have successfully created a new task for the ToolArena benchmark. Now, open a [new Pull Request](https://github.com/georg-wolflein/ToolArena/pulls) on GitHub to submit this task!
 
 ## Tips and best practices
 
