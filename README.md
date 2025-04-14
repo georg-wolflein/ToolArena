@@ -127,7 +127,7 @@ pytest tasks --implementation <IMPLEMENTATION_DIR>
 Each task provides a human-generated *reference implementation* to prove that the task is possible.
 The reference implementations are supplied alongside the task definitions in the [`tasks/`](tasks/) directory.
 
-To run the reference implementatino for any task, simply omit the `--implementation` flag:
+To run the reference implementation for any task, simply omit the `--implementation` flag:
 ```bash
 # Run a single invocation (example invocation):
 toolarena run <TASK_NAME> example
@@ -149,7 +149,7 @@ If you need to inspect a running container or attach a debugger:
    ```
    This starts the container and provides instructions to attach VS Code or open a bash session in the container.
 
-2. **Check logs** directly in Docker**:
+2. **Check logs** directly in Docker:
    ```bash
    docker run <TASK_NAME> <INVOCATION> --implementation <IMPLEMENTATION_DIR>
    docker logs -f <TASK_NAME>
