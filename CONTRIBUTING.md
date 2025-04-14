@@ -26,6 +26,7 @@ When you create a new task, you place these files in a directory under `tasks/`.
 > ```
 > tasks/
 >  └─ my_nifty_task/
+>      ├─ __init__.py
 >      ├─ task.yaml
 >      ├─ install.sh
 >      ├─ implementation.py
@@ -93,6 +94,7 @@ This will create a new task at `tasks/my_nifty_task` with a `task.yaml` file to 
 > ```
 > tasks/
 >  └─ my_nifty_task/
+>      ├─ __init__.py  # (empty file)
 >      ├─ task.yaml
 >      └─ data/
 >          ├─ .gitignore
@@ -139,6 +141,7 @@ If your task requires large files (e.g. larger than a few MB), please add these 
 > ```
 > tasks/
 >  └─ my_nifty_task/
+>      ├─ __init__.py
 >      ├─ task.yaml
 >      └─ data/
 >          ├─ .gitignore
@@ -159,6 +162,7 @@ toolarena generate my_nifty_tool
 > ```
 > tasks/
 >  └─ my_nifty_task/
+>      ├─ __init__.py
 >      ├─ task.yaml
 >      ├─ implementation.py
 >      ├─ install.sh
