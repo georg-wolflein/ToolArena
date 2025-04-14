@@ -132,7 +132,7 @@ At this point, you should at least define the following parts (the `config.yaml`
 5. **`returns`**: outputs your tool produces.
 
 ## 5. Add data required to run the task
-If your task requires external data, add these files to the `data/` folder within your task. You may place any files / datasets in there that your tool requires as input for the example invocation or for the tests later on.
+If your task requires external data as input, add these files to the `data/` folder within your task. You may place any files / datasets in there that your tool requires as input for the example invocation or for the tests later on.
 
 If your task requires large files (e.g. larger than a few MB), please add these files to the `data/.gitignore` file and add commands in the `data/download.sh` script so they can be downloaded by the user of the benchmark.
 > Your directory structure will now look as follows:
