@@ -242,13 +242,6 @@ This file must define **one function** whose name matches `name` in `task.yaml` 
 > [!NOTE]  
 > Do **not** define imports globally; instead put your import statements in the body of the function, as shown in the example above.
 
-> [!TIP]  
-> You can attach VS Code to your task's Docker container by running:
-> ```bash
-> toolarena debug my_nifty_task example
-> ```
-> This will start a docker container for the `example` invocation (specified in the `example` section of `task.yaml`). This command will provide instructions on how to attach VS code to the container.
-
 ## 10. Check that the example invocation works
 To check that the example invocation runs as expected, run the following command:
 ```bash
@@ -256,6 +249,15 @@ toolarena run my_nifty_example example
 ```
 Check that the result and standard output are as expected for your task.
 If there is an error, you should modify the `install.sh` and/or `implementation.py` files to work correctly, and then re-run the `toolarena run my_nifty_example example` command.
+
+> [!TIP]  
+> In most cases, it is sufficient to use the above command (`toolarena run my_nifty_task example`) and edit the `install.sh` and `implementation.py` files if there are errors.
+>
+> However, you can also attach VS Code to your task's Docker container by running:
+> ```bash
+> toolarena debug my_nifty_task example
+> ```
+> This will start a docker container for the `example` invocation (specified in the `example` section of `task.yaml`). This command will provide instructions on how to attach VS code to the container.
 
 ## 11. Write tests
 Define 2-3 test invocations in the `invocation` section of `task.yaml`.

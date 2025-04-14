@@ -29,9 +29,10 @@ def init(name: Annotated[str, typer.Argument(help="The name of the tool")]) -> N
     """Initialize a new tool."""
     task_dir = TASKS_DIR / name
     if task_dir.exists():
-        raise typer.Abort(f"Task directory {task_dir} already exists")
+        print(f"Task directory [bold]{task_dir}[/bold] already exists!")
+        raise typer.Abort()
     shutil.copytree(TEMPLATE_DIR / "task", task_dir)
-    print(f"Initialized tool {name} at {task_dir}")
+    print(f"Initialized tool [bold]{name}[/bold] at [bold]{task_dir}[/bold]")
 
 
 @app.command()
@@ -40,7 +41,8 @@ def generate(name: Annotated[str, typer.Argument(help="The name of the tool")]) 
     task_dir = TASKS_DIR / name
     definition_path = task_dir / "task.yaml"
     if not definition_path.exists():
-        raise typer.Abort(f"Task definition {definition_path} does not exist")
+        print(f"Task definition [bold]{definition_path}[/bold] does not exist")
+        raise typer.Abort()
     definition = ToolDefinition.from_yaml(definition_path)
 
     code_file = task_dir / "implementation.py"
@@ -48,15 +50,22 @@ def generate(name: Annotated[str, typer.Argument(help="The name of the tool")]) 
 
     if not code_file.exists():
         code_file.write_text(definition.python_signature)
-        logger.info(f"Created {code_file}")
+        print(f"[green]Created[/green] [bold]{code_file}[/bold]")
+    else:
+        print(f"[yellow]Skipping[/yellow] [bold]{code_file}[/bold] (already exists)")
 
     if not install_script.exists():
         install_script.write_text(
             f"#! /bin/bash\n"
+            f"set -e\n\n"
             f"{definition.repo.git_clone_command}\n\n"
             f"# Insert commands here to install dependencies and setup the environment...\n"
         )
-        logger.info(f"Created {install_script}")
+        print(f"[green]Created[/green] [bold]{install_script}[/bold]")
+    else:
+        print(
+            f"[yellow]Skipping[/yellow] [bold]{install_script}[/bold] (already exists)"
+        )
     print("Done!")
 
 
@@ -65,7 +74,7 @@ def build(
     name: Annotated[str, typer.Argument(help="The name of the tool")],
     implementation: Annotated[
         Path | None,
-        typer.Argument(
+        typer.Option(
             help="Path to the folder where the implementation is stored (optional, default use the implementation in the task directory). This folder should contain an install.sh script and a implementation.py file."
         ),
     ] = None,
@@ -91,7 +100,7 @@ def run(
     name: Annotated[str, typer.Argument(help="The name of the tool")],
     implementation: Annotated[
         Path | None,
-        typer.Argument(
+        typer.Option(
             help="Path to the folder where the implementation is stored (optional, default use the implementation in the task directory). This folder should contain an install.sh script and a implementation.py file."
         ),
     ] = None,
@@ -157,7 +166,7 @@ def debug(
     name: Annotated[str, typer.Argument(help="The name of the tool")],
     implementation: Annotated[
         Path | None,
-        typer.Argument(
+        typer.Option(
             help="Path to the folder where the implementation is stored (optional, default use the implementation in the task directory). This folder should contain an install.sh script and a implementation.py file."
         ),
     ] = None,
