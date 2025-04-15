@@ -710,6 +710,18 @@ wheels = [
 ]
 
 [[package]]
+name = "pytest-asyncio"
+version = "0.26.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pytest" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/8e/c4/453c52c659521066969523e87d85d54139bbd17b78f09532fb8eb8cdb58e/pytest_asyncio-0.26.0.tar.gz", hash = "sha256:c4df2a697648241ff39e7f0e4a73050b03f123f760673956cf0d72a4990e312f", size = 54156 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/20/7f/338843f449ace853647ace35870874f69a764d251872ed1b4de9f234822c/pytest_asyncio-0.26.0-py3-none-any.whl", hash = "sha256:7b51ed894f4fbea1340262bdae5135797ebbe21d8638978e35d31c6d19f72fb0", size = 19694 },
+]
+
+[[package]]
 name = "pytest-lazy-fixtures"
 version = "1.1.2"
 source = { registry = "https://pypi.org/simple" }
@@ -953,6 +965,7 @@ benchmark = [
 ]
 dev = [
     { name = "ipykernel" },
+    { name = "pytest-asyncio" },
     { name = "types-docker" },
     { name = "types-pyyaml" },
 ]
@@ -980,6 +993,7 @@ requires-dist = [
 benchmark = [{ name = "h5py", specifier = ">=3.13.0" }]
 dev = [
     { name = "ipykernel", specifier = ">=6.29.5" },
+    { name = "pytest-asyncio", specifier = ">=0.26.0" },
     { name = "types-docker", specifier = ">=7.1.0.20241229" },
     { name = "types-pyyaml", specifier = ">=6.0.12.20241230" },
 ]

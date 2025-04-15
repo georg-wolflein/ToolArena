@@ -15,8 +15,8 @@ COPY toolarena ./toolarena
 RUN mkdir -p /workspace
 WORKDIR /workspace
 
-COPY docker/subprocess_utils.py /toolarena/subprocess_utils.py
-COPY docker/function_runner.py /toolarena/function_runner.py
+COPY scripts/subprocess_utils.py /toolarena/subprocess_utils.py
+COPY scripts/function_runner.py /toolarena/function_runner.py
 
 # For backwards compatibility with the old toolmaker runtime
 RUN mkdir -p /toolmaker && ln -s /toolarena/subprocess_utils.py /toolmaker/subprocess_utils.py

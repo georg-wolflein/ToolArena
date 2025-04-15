@@ -1,8 +1,10 @@
+import codecs
 import os
 import re
 import shutil
-from collections.abc import Container, Mapping
+from collections.abc import AsyncGenerator, Container, Mapping
 from pathlib import Path
+from typing import TypeAlias
 
 from loguru import logger
 
@@ -10,6 +12,10 @@ ROOT_DIR = Path(__file__).parent.parent
 RUNS_DIR = ROOT_DIR / "runs"
 TASKS_DIR = ROOT_DIR / "tasks"
 TEMPLATE_DIR = ROOT_DIR / "template"
+
+EnvVarName: TypeAlias = str
+EnvVarValue: TypeAlias = str
+EnvMapping: TypeAlias = Mapping[EnvVarName, EnvVarValue]
 
 
 def join_paths(parent: os.PathLike | str, *children: os.PathLike | str) -> Path:
@@ -60,25 +66,47 @@ ENV_VAR_SUBSTITUTION_PATTERN = re.compile(
 
 def substitute_env_vars(
     s: str,
-    env: Mapping[str, str] | None = None,
-    allowed: Container[str]
-    | None = None,  # if set, only these variables will be substituted
+    env: EnvMapping | None = None,
+    allowed: Container[EnvVarName] | None = None,
 ) -> str:
+    """Substitute environment variables in a string.
+
+    Args:
+        s: The string containing environment variable references in the format ${env:VAR_NAME}
+        env: Optional mapping of environment variables to use. If None, uses os.environ
+        allowed: Optional container of allowed environment variable names. If None, all variables are allowed.
+
+    Returns:
+        The string with environment variables substituted.
+
+    Examples:
+        >>> substitute_env_vars("${env:HOME}/docs")
+        "/home/user/docs"
+        >>> substitute_env_vars("${env:NONEXISTENT}")
+        "${env:NONEXISTENT}"
+    """
     if env is None:
         env = os.environ
 
-    def substitute(match: re.Match) -> str:
+    def substitute(match: re.Match[str]) -> str:
         var = match.group("var")
         if var not in env:
-            logger.warning(
-                f"Unable to perform environment variable substitution for {var}: not found in environment"
-            )
+            logger.warning(f"Environment variable {var} not found in environment")
             return match.group("full")
         if allowed is not None and var not in allowed:
-            logger.warning(
-                f"Unable to perform environment variable substitution for {var}: not in list of allowed environment variable substitutions ({allowed!r})"
-            )
+            logger.warning(f"Environment variable {var} not in allowed list: {allowed}")
             return match.group("full")
         return env[var]
 
     return ENV_VAR_SUBSTITUTION_PATTERN.sub(substitute, s)
+
+
+async def stream_binary_to_str(
+    stream: AsyncGenerator[bytes, None],
+) -> AsyncGenerator[str, None]:
+    decoder = codecs.getincrementaldecoder("utf-8")()
+    async for chunk in stream:
+        yield decoder.decode(chunk)
+    # Flush any remaining bytes
+    if final := decoder.decode(b"", final=True):
+        yield final
