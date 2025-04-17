@@ -12,6 +12,12 @@ You can think of a tool as a Python function that performs a given task: it has 
 > [!NOTE]  
 > The terms "task" and "tool" are used interchangeably in this guide.
 
+So, what makes a good task?
+**A good task for ToolArena is a well-scoped, functional wrapper around an open-source GitHub repository that is associated with a research paper.**
+The task should be meaningful for LLM-based tool generation -- simple enough to be learnable from documentation and repo code, yet non-trivial enough to require some reasoning and code synthesis.
+Importantly, it must also be *testable*, i.e. you can write code to assess whether the task was successful.
+
+When you create a new task, you place these files in a directory under `tasks/`. For example, if your task is named `my_nifty_task`, your files would live under `tasks/my_nifty_task/`.
 Each task in ToolArena consists of:
 1. A **task definition** (`task.yaml`) containing basic metadata, inputs/outputs, test invocations, etc.
 2. A **reference solution** (i.e. implementation), consisting of:
@@ -19,8 +25,6 @@ Each task in ToolArena consists of:
    - An **code implementation** (`implementation.py`) containing the Python implementation for the tool itself.
 3. Any **data** files needed to invoke the tool (`data/` and `data/tests`).
 4. Several **unit tests** to assess the correctness of a candidate implementation (`tests.py`).
-
-When you create a new task, you place these files in a directory under `tasks/`. For example, if your task is named `my_nifty_task`, your files would live under `tasks/my_nifty_task/`.
 
 > This guide will walk you through creating all the necessary files to define a task. By the end of this guide, you will have produced the following directory structure:
 > ```
