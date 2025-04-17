@@ -1,7 +1,9 @@
+import asyncio
 from collections.abc import Container, Mapping
+from typing import Sequence
 
 import pytest
-from toolarena.utils import stream_binary_to_str, substitute_env_vars
+from toolarena.utils import stream_reader_to_str_stream, substitute_env_vars
 
 
 @pytest.fixture
@@ -93,33 +95,37 @@ def test_disallowed_env_var(test_env: Mapping[str, str]) -> None:
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    "input_chunks,expected_output",
+    "input_bytes,expected_output,chunk_size",
     [
-        ([], []),  # Empty input
-        ([b"hello world"], ["hello world"]),  # Single chunk
-        ([b"hello ", b"world"], ["hello ", "world"]),  # Multiple chunks
-        ([b"\xe2\x82\xac", b"20"], ["€", "20"]),  # Unicode characters
-        ([b"\xe2\x82", b"\xac"], ["", "€"]),  # Split unicode character
+        (b"", [], 1),
+        (b"hello world", ["hello world"], 100),
+        (b"hello world", ["hello", " worl", "d"], 5),
+        (b"\xe2\x82\xac", ["", "", "€"], 1),
+        (b"\xe2\x82\xac20", ["", "", "€", "2", "0"], 1),
     ],
-    ids=["empty", "single_chunk", "multiple_chunks", "unicode", "split_unicode"],
+    ids=["empty", "single_chunk", "multiple_chunks", "split_unicode", "unicode"],
 )
-async def test_stream_binary_to_str(
-    input_chunks: list[bytes], expected_output: list[str]
+async def test_stream_reader_to_str_stream(
+    input_bytes: bytes, expected_output: Sequence[str], chunk_size: int
 ) -> None:
     """
-    Test the stream_binary_to_str function with various input scenarios.
+    Test the stream_reader_to_str_stream function with various input scenarios.
 
     Args:
-        input_chunks: List of byte chunks to feed into the stream
+        input_bytes: Bytes to feed into the stream
         expected_output: Expected string chunks from the stream
     """
+    # Create a StreamReader
+    reader = asyncio.StreamReader()
 
-    async def stream():
-        for chunk in input_chunks:
-            yield chunk
+    # Feed the chunks to the reader
+    reader.feed_data(input_bytes)
+    reader.feed_eof()
 
-    result = []
-    async for chunk in stream_binary_to_str(stream()):
-        result.append(chunk)
+    # Collect the output
+    result = [
+        chunk
+        async for chunk in stream_reader_to_str_stream(reader, chunk_size=chunk_size)
+    ]
 
     assert result == expected_output

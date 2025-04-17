@@ -10,6 +10,7 @@ from loguru import logger
 
 from toolarena.definition import ToolDefinition
 from toolarena.run import ToolResult
+from toolarena.utils import stream_reader_to_str_stream
 
 RUNTIME_DIR = Path(os.getenv("WORKSPACE_DIR", "/workspace"))
 TOOLARENA_DIR = Path(os.getenv("TOOLARENA_DIR", "/toolarena"))
@@ -63,20 +64,19 @@ async def run(args: task_definition.args_to_pydantic()) -> ToolResult:  # type: 
         env=os.environ,
         start_new_session=True,  # this is to make sure an error is thrown if the command attempts to read from stdin
     )
-    stdout = b""
-    while (chunk := await process.stdout.read(32)) != b"":  # type: ignore
+
+    stdout = ""
+    async for chunk in stream_reader_to_str_stream(process.stdout):
         stdout += chunk
-        try:
-            print(chunk.decode("utf-8"), end="")
-        except UnicodeDecodeError:
-            print(chunk, end="")
+        print(chunk, end="")
+        yield chunk
     return_code = await process.wait()
     response = ToolResult(
         return_code=return_code,
         result=json.loads(output_path.read_text())["result"]
         if output_path.exists()
         else None,
-        stdout=stdout.decode("utf-8"),
+        stdout=stdout,
     )
     for file in (info_path, output_path):
         file.unlink(missing_ok=True)

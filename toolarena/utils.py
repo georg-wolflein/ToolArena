@@ -1,3 +1,4 @@
+import asyncio
 import codecs
 import os
 import re
@@ -101,12 +102,12 @@ def substitute_env_vars(
     return ENV_VAR_SUBSTITUTION_PATTERN.sub(substitute, s)
 
 
-async def stream_binary_to_str(
-    stream: AsyncGenerator[bytes, None],
+async def stream_reader_to_str_stream(
+    stream: asyncio.StreamReader, chunk_size: int = 32
 ) -> AsyncGenerator[str, None]:
     decoder = codecs.getincrementaldecoder("utf-8")()
-    async for chunk in stream:
+    while (chunk := await stream.read(chunk_size)) != b"":
         yield decoder.decode(chunk)
-    # Flush any remaining bytes
-    if final := decoder.decode(b"", final=True):
+    final = decoder.decode(b"", final=True)
+    if final:
         yield final
