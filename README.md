@@ -9,7 +9,7 @@ ToolArena contains multiple tasks under the [`tasks/`](tasks/) directory. Each t
 - **Implementation-agnostic**: we provide a *reference* implementation in `implementation.py` with a companion `install.sh` that sets up dependencies.  
 - **Tested**: A `tests.py` script ensures that any candidate implementation is correct.
 
-By default, each task’s folder contains:
+By default, each task's folder contains:
 ```
 tasks/<TASK_NAME>/
   ├── task.yaml
@@ -91,7 +91,7 @@ Suppose you have created a folder `<IMPLEMENTATION_DIR>` (outside of `tasks/`) t
       ├── install.sh
       └── implementation.py
 ```
-Here’s how to run it:
+Here's how to run it:
 ```bash
 toolarena run <TASK_NAME> <INVOCATION> --implementation <IMPLEMENTATION_DIR>
 ```
