@@ -10,7 +10,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Final, Iterator, Literal, Self, Sequence, cast
 
-import docker
 import httpx
 import tenacity
 from docker.errors import BuildError
@@ -22,6 +21,7 @@ from docker.utils.json_stream import json_stream
 from loguru import logger
 from pydantic import BaseModel
 
+import docker
 from toolarena.definition import ArgumentType
 from toolarena.utils import ROOT_DIR, join_paths, rmdir
 
@@ -227,9 +227,8 @@ class DockerRuntimeClient(HTTPToolClient):
             device_requests.append(
                 DeviceRequest(device_ids=gpus, capabilities=[["gpu"]])
             )
-            if "CUDA_VISIBLE_DEVICES" not in env:
-                env = dict(env)
-                env["CUDA_VISIBLE_DEVICES"] = ",".join(str(i) for i in range(len(gpus)))
+        if "CUDA_VISIBLE_DEVICES" not in env:
+            env |= {"CUDA_VISIBLE_DEVICES": ",".join(map(str, range(len(gpus))))}
         logger.debug(f"Starting container with GPUs {gpus}")
 
         # Start a container with the supplied name
