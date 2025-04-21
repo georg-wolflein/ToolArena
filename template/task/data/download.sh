@@ -1,5 +1,7 @@
 #! /bin/bash
 
+set -e
+
 # Download large files required for the task
 
 # Example:
