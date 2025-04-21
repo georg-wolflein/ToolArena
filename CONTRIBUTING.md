@@ -197,6 +197,7 @@ toolarena generate my_nifty_tool
 >       ├── task.yaml
 >       ├── implementation.py
 >       ├── install.sh
+>       ├── tests.py
 >       └── data/
 >           ├── .gitignore
 >           ├── download.sh
@@ -303,7 +304,8 @@ If there is an error, you should modify the `install.sh` and/or `implementation.
 Define 2-3 test invocations in the `invocation` section of `task.yaml`.
 These invocations are defined similarly to how you defined the `example` invocation.
 
-Then, write unit tests for these invocations. You can use the unit tests at [`tasks/conch_extract_features/tests.py`](tasks/conch_extract_features/tests.py) (or any of the other tasks) as an example how to define these tests.
+Then, write unit tests for these invocations in the `tests.py` file.
+You can use the unit tests at [`tasks/conch_extract_features/tests.py`](tasks/conch_extract_features/tests.py) (or any of the other tasks) as an example how to define these tests.
 
 > [!TIP]  
 > You can see the outputs that your tool implementation produces for each of your test invocations by running:

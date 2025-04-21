@@ -47,6 +47,7 @@ def generate(name: Annotated[str, typer.Argument(help="The name of the tool")]) 
 
     code_file = task_dir / "implementation.py"
     install_script = task_dir / "install.sh"
+    tests_file = task_dir / "tests.py"
 
     if not code_file.exists():
         code_file.write_text(definition.python_signature)
@@ -66,7 +67,25 @@ def generate(name: Annotated[str, typer.Argument(help="The name of the tool")]) 
         print(
             f"[yellow]Skipping[/yellow] [bold]{install_script}[/bold] (already exists)"
         )
-    print("Done!")
+
+    if not tests_file.exists():
+        tests_file.write_text(f"""import pytest
+from pytest_lazy_fixtures import lf
+from tasks.utils import initialize, parametrize_invocation
+from toolarena.run import ToolRunResult
+
+initialize()
+
+
+@parametrize_invocation({", ".join(('"' + k + '"') for k in definition.test_invocations.keys())})
+def test_status(invocation: ToolRunResult):
+    assert invocation.status == "success"
+
+# TODO: Add more tests here. You may take inspiration from the tests in the other tasks' `tests.py` files.
+""")
+        print(f"[green]Created[/green] [bold]{tests_file}[/bold]")
+    else:
+        print(f"[yellow]Skipping[/yellow] [bold]{tests_file}[/bold] (already exists)")
 
 
 @app.command()
