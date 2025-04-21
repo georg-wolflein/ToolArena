@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Final, Iterator, Literal, Self, Sequence, cast
 
+import docker
 import httpx
 import tenacity
 from docker.errors import BuildError
@@ -21,7 +22,6 @@ from docker.utils.json_stream import json_stream
 from loguru import logger
 from pydantic import BaseModel
 
-import docker
 from toolarena.definition import ArgumentType
 from toolarena.utils import ROOT_DIR, join_paths, rmdir
 
@@ -87,6 +87,7 @@ class HTTPToolClient:
             raise RuntimeError(
                 f"Runtime client did not become ready after {timeout} seconds. You may want to inspect the container logs using `docker logs {self.name}`"
             )
+        logger.debug(f"Runtime client {self.name} is ready")
         return self
 
 

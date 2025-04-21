@@ -103,7 +103,7 @@ def substitute_env_vars(
 
 
 async def stream_reader_to_str_stream(
-    stream: asyncio.StreamReader, chunk_size: int = 32
+    stream: asyncio.StreamReader, chunk_size: int = 16
 ) -> AsyncGenerator[str, None]:
     decoder = codecs.getincrementaldecoder("utf-8")()
     while (chunk := await stream.read(chunk_size)) != b"":

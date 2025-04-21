@@ -69,7 +69,6 @@ async def run(args: task_definition.args_to_pydantic()) -> ToolResult:  # type: 
     async for chunk in stream_reader_to_str_stream(process.stdout):
         stdout += chunk
         print(chunk, end="")
-        yield chunk
     return_code = await process.wait()
     response = ToolResult(
         return_code=return_code,
