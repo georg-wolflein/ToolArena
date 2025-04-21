@@ -37,7 +37,7 @@ def init(name: Annotated[str, typer.Argument(help="The name of the tool")]) -> N
 
 @app.command()
 def generate(name: Annotated[str, typer.Argument(help="The name of the tool")]) -> None:
-    """Generate the starting files for a new tool."""
+    """Generate the starting files for a new tool, after it has been initialized and the `task.yaml` file has been populated."""
     task_dir = TASKS_DIR / name
     definition_path = task_dir / "task.yaml"
     if not definition_path.exists():
@@ -53,7 +53,7 @@ def generate(name: Annotated[str, typer.Argument(help="The name of the tool")]) 
         code_file.write_text(definition.python_signature)
         print(f"[green]Created[/green] [bold]{code_file}[/bold]")
     else:
-        print(f"[yellow]Skipping[/yellow] [bold]{code_file}[/bold] (already exists)")
+        print(f"[yellow]Skipped[/yellow] [bold]{code_file}[/bold] (already exists)")
 
     if not install_script.exists():
         install_script.write_text(
@@ -65,7 +65,7 @@ def generate(name: Annotated[str, typer.Argument(help="The name of the tool")]) 
         print(f"[green]Created[/green] [bold]{install_script}[/bold]")
     else:
         print(
-            f"[yellow]Skipping[/yellow] [bold]{install_script}[/bold] (already exists)"
+            f"[yellow]Skipped[/yellow] [bold]{install_script}[/bold] (already exists)"
         )
 
     if not tests_file.exists():
@@ -85,7 +85,7 @@ def test_status(invocation: ToolRunResult):
 """)
         print(f"[green]Created[/green] [bold]{tests_file}[/bold]")
     else:
-        print(f"[yellow]Skipping[/yellow] [bold]{tests_file}[/bold] (already exists)")
+        print(f"[yellow]Skipped[/yellow] [bold]{tests_file}[/bold] (already exists)")
 
 
 @app.command()
