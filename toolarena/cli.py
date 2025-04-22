@@ -109,7 +109,7 @@ def build(
         ).read_text(),
     )
     print(
-        f"To start an interactive shell, run: [bold]docker run -it --rm {image.image.tags[0]} /bin/bash[/bold]"
+        f"To start an interactive shell, run: [bold]docker run -it --rm --env-file .env {image.image.tags[0]} /bin/bash[/bold]"
     )
     return image
 

@@ -141,27 +141,31 @@ At this point, you should at least define the following parts (the `config.yaml`
 4. **`arguments`**: inputs your tool expects.
 5. **`returns`**: outputs your tool produces.
 
-> [!NOTE]  
-> In the `env` section of `repo`, you can define environment variables that should be set for the tool.
-> For example, to set the environment variable `MY_ENV_VAR` to the value `"abc"`, you would write:
+### Defining environment variables
+In the `env` section of `repo`, you can define environment variables that should be set for the tool.
+For example, to set the environment variable `MY_ENV_VAR` to the value `"abc"`, you would write:
+```yaml
+repo:
+  env:
+    MY_ENV_VAR: "abc"
+``` 
+The main use case for environment variables is to supply **secret tokens** such as API keys. For this, you may use a special syntax (`"${env:MY_TOKEN}"`) to insert environment variables from your *local environment*, defined in the top-level `.env` file.
+
+> [!IMPORTANT]
+> The `.env` file should be placed at the **top level** of the ToolArena repository, **not** within your task folder `tasks/my_nifty_task/.env`!
+
+For example, if you set the following in your `.env` file:
+> **`.env`:**
+> ```bash
+> HF_TOKEN=my_huggingface_token
+> ```
+Then you can tell ToolArena that the local `HF_TOKEN` environment variable defined in `.env` should be available to the tool as an environment variable, also named `HF_TOKEN`:
+> **`tasks/my_nifty_task/task.yaml`:**
 > ```yaml
 > repo:
 >   env:
->     MY_ENV_VAR: "abc"
+>     HF_TOKEN: "${env:HF_TOKEN}"
 > ``` 
-> The main use case for environment variables is to supply **secret tokens** such as API keys. For this, you may use a special syntax (`"${env:MY_TOKEN}"`) to insert environment variables from your *local environment*, defined in the top-level `.env` file.
-> For example, if you set the following in your `.env` file:
-> > **`.env`:**
-> > ```bash
-> > HF_TOKEN=my_huggingface_token
-> > ```
-> Then you can tell ToolArena that the local `HF_TOKEN` environment variable defined in `.env` should be available to the tool as an environment variable, also named `HF_TOKEN`:
-> > **`tasks/my_nifty_task/task.yaml`:**
-> > ```yaml
-> > repo:
-> >   env:
-> >     HF_TOKEN: "${env:HF_TOKEN}"
-> > ``` 
 
 
 ## 5. Add data required to run the task
@@ -225,14 +229,14 @@ toolarena build my_nifty_task
 This will create a Docker image using your `install.sh` script to install all dependencies.
 If this succeeds without errors, you can start an interactive shell in a container based on this image using:
 ```bash
-docker run -it --rm my_nifty_task /bin/bash
+docker run -it --rm --env-file .env toolarena-tool:my_nifty_task /bin/bash
 ```
 
 > [!TIP]  
 > You can just start with an empty `install.sh` file including just the `git clone` command, and then run:
 > ```bash
 > toolarena build my_nifty_task
-> docker run -it --rm my_nifty_task /bin/bash
+> docker run -it --rm --env-file .env toolarena-tool:my_nifty_task /bin/bash
 > ```
 > In the interactive shell, you can just run the commands you need in order to install all the dependencies.
 > Simply take note of the commands you ran and put them in the `install.sh` file!
