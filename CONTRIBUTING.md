@@ -90,6 +90,10 @@ Each task in ToolArena consists of:
    ```bash
    docker pull ghcr.io/georg-wolflein/toolarena:main
    ```
+6. Create a `.env` file at the root of the repository (it can be empty for now):
+   ```bash
+   touch .env
+   ```
 
 ## 3. Create a new task
 
@@ -141,8 +145,8 @@ At this point, you should at least define the following parts (the `config.yaml`
 4. **`arguments`**: inputs your tool expects.
 5. **`returns`**: outputs your tool produces.
 
-### Defining environment variables
-In the `env` section of `repo`, you can define environment variables that should be set for the tool.
+### Define environment variables (optional)
+In the `env` section of `repo`, you may optionally define environment variables that should be set for the tool.
 For example, to set the environment variable `MY_ENV_VAR` to the value `"abc"`, you would write:
 ```yaml
 repo:
