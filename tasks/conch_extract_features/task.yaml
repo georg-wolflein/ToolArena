@@ -9,32 +9,40 @@ papers: [lu2024conch]
 category: pathology
 description: Perform feature extraction on an input image using CONCH.
 arguments:
-  input_image:
+  - name: input_image
     description: Path to the input image
     type: str
 returns:
-  features:
+  - name: features
     description: The feature vector extracted from the input image, as a list of floats
     type: list
 example:
   arguments:
-    input_image: /mount/input/TUM-TCGA-ACRLPPQE.tif
+    - name: input_image
+      value: /mount/input/TUM-TCGA-ACRLPPQE.tif
   mount:
-    TUM-TCGA-ACRLPPQE.tif: TUM-TCGA-ACRLPPQE.tif
+    - source: TUM-TCGA-ACRLPPQE.tif
+      target: TUM-TCGA-ACRLPPQE.tif
 test_invocations:
-  tif:
+  - name: tif
     arguments:
-      input_image: /mount/input/MUC/MUC-TCGA-ACCPKIPN.tif
+      - name: input_image
+        value: /mount/input/MUC/MUC-TCGA-ACCPKIPN.tif
     mount:
-      MUC-TCGA-ACCPKIPN.tif: MUC/MUC-TCGA-ACCPKIPN.tif
-  png:
+      - source: MUC/MUC-TCGA-ACCPKIPN.tif
+        target: MUC/MUC-TCGA-ACCPKIPN.tif
+  - name: png
     arguments:
-      input_image: /mount/input/TCGA-BRCA_patch_TCGA-BH-A0DE-01Z-00-DX1.64A0340A-8146-48E8-AAF7-4035988B9152.png
+      - name: input_image
+        value: /mount/input/TCGA-BRCA_patch_TCGA-BH-A0DE-01Z-00-DX1.64A0340A-8146-48E8-AAF7-4035988B9152.png
     mount:
-      TCGA-BRCA_patch_TCGA-BH-A0DE-01Z-00-DX1.64A0340A-8146-48E8-AAF7-4035988B9152.png: TCGA-BRCA_patch_TCGA-BH-A0DE-01Z-00-DX1.64A0340A-8146-48E8-AAF7-4035988B9152.png
-  jpg:
+      - source: TCGA-BRCA_patch_TCGA-BH-A0DE-01Z-00-DX1.64A0340A-8146-48E8-AAF7-4035988B9152.png
+        target: TCGA-BRCA_patch_TCGA-BH-A0DE-01Z-00-DX1.64A0340A-8146-48E8-AAF7-4035988B9152.png
+  - name: jpg
     arguments:
-      input_image: /mount/input/TCGA-BRCA_patch_TCGA-BH-A0DE-01Z-00-DX1.64A0340A-8146-48E8-AAF7-4035988B9152.jpg
+      - name: input_image
+        value: /mount/input/TCGA-BRCA_patch_TCGA-BH-A0DE-01Z-00-DX1.64A0340A-8146-48E8-AAF7-4035988B9152.jpg
     mount:
-      TCGA-BRCA_patch_TCGA-BH-A0DE-01Z-00-DX1.64A0340A-8146-48E8-AAF7-4035988B9152.jpg: TCGA-BRCA_patch_TCGA-BH-A0DE-01Z-00-DX1.64A0340A-8146-48E8-AAF7-4035988B9152.jpg
+      - source: TCGA-BRCA_patch_TCGA-BH-A0DE-01Z-00-DX1.64A0340A-8146-48E8-AAF7-4035988B9152.jpg
+        target: TCGA-BRCA_patch_TCGA-BH-A0DE-01Z-00-DX1.64A0340A-8146-48E8-AAF7-4035988B9152.jpg
 

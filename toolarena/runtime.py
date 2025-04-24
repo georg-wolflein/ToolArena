@@ -17,16 +17,14 @@ from docker.errors import BuildError
 from docker.errors import NotFound as DockerNotFoundError
 from docker.models.containers import Container
 from docker.models.images import Image
-from docker.types import DeviceRequest, Mount
+from docker.types import DeviceRequest
+from docker.types import Mount as DockerMount
 from docker.utils.json_stream import json_stream
 from loguru import logger
 from pydantic import BaseModel
 
-from toolarena.definition import ArgumentType
+from toolarena.definition import ArgumentType, Mount
 from toolarena.utils import ROOT_DIR, join_paths, rmdir
-
-type MountMapping = Mapping[str, str]  # host -> container
-
 
 TOOL_DOCKERFILE: Final[Path] = ROOT_DIR / "docker" / "tool.Dockerfile"
 DEFAULT_TOOL_IMAGE_NAME: Final[str] = "toolarena-tool"
@@ -100,13 +98,13 @@ class Mounts:
     input: Path | None = None  # folder to mount as input
     output: Path | None = None  # folder to mount as output
     data_dir: Path | None = None  # folder to copy input data from
-    input_mapping: MountMapping | None = None  # mapping of input data to mount
+    input_mapping: Sequence[Mount] = ()  # mapping of input data to mount
 
-    def to_docker(self) -> list[Mount]:
+    def to_docker(self) -> list[DockerMount]:
         mounts = []
         if self.input is not None:
             mounts.append(
-                Mount(
+                DockerMount(
                     target="/mount/input",
                     source=str(Path(self.input).resolve()),
                     type="bind",
@@ -115,7 +113,7 @@ class Mounts:
             )
         if self.output is not None:
             mounts.append(
-                Mount(
+                DockerMount(
                     target="/mount/output",
                     source=str(Path(self.output).resolve()),
                     type="bind",
@@ -139,9 +137,9 @@ class Mounts:
             if not self.data_dir:
                 raise ValueError("data_dir is required")
 
-            for src, dst in self.input_mapping.items():
-                src_path = join_paths(self.data_dir, src)
-                dst_path = join_paths(self.input, dst)
+            for mount in self.input_mapping:
+                src_path = join_paths(self.data_dir, mount.source)
+                dst_path = join_paths(self.input, mount.target)
                 logger.debug(f"Copying {src_path} to {dst_path}")
                 if not src_path.exists():
                     raise FileNotFoundError(f"Input data not found: {src_path}")

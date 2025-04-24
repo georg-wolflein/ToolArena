@@ -1,114 +1,115 @@
-name: textgrad_medical_qa_optimize # Name of the task. Should correspond to the name of the folder.
+name: textgrad_medical_qa_optimize
 repo:
-  name: textgrad # Name of the repository.
-  url: "https://github.com/zou-group/textgrad" # URL of the repository.
-  commit: bf5b0c5 # Commit hash of the repository (optional, default is the latest commit). It is recommended to use a specific commit to ensure reproducibility.
-  # branch: main # Branch of the repository (optional)
+  name: textgrad
+  url: "https://github.com/zou-group/textgrad"
+  commit: bf5b0c5
   env:
-    # Here, you can specify environment variables that should be available for installing the repository or running the task.
-    # The format is key: value, where value is a string that can include variables from the local environment.
-    # You may also leave this empty if the repository does not require any tokens/secrets.
     OPENAI_API_KEY: "${env:OPENAI_API_KEY}"
-papers: [zou2024textgrad] # List of papers that this task is based on. Papers are specified by their IDs in the papers.bib file.
-category: pathology # Category of the task.
+papers: [zou2024textgrad]
+category: pathology
 description: >
   Optimize answers to multiple-choice medical questions using TextGrad.
   Each question is improved at test-time through textual gradients,
   guided by an objective (e.g. "Make the answer concise and accurate"). 
-# Description of the task. This should be 1-3 sentences in length, explaining to the LLM what this tool should do.
 arguments:
-  # Arguments of the task. The key is the name of the argument and the value is a dictionary with the keys "description" and "type".
-  # For example, the following 3 lines define an argument "input_image" with a description "Path to the input image" and a type "str".
-  csv_path:
+  - name: csv_path
     description: "Path to a CSV file containing columns: 'index', 'question', 'objective'"
     type: str
-  backward_engine:
+  - name: backward_engine
     description: The model used to compute textual gradients (e.g., 'gpt-4o')
     type: str
-  forward_engine:
+  - name: forward_engine
     description: The model used to generate initial zero-shot answers (e.g., 'gpt-3.5-turbo')
     type: str
-  starting_system_prompt:
+  - name: starting_system_prompt
     description: "System prompt to guide the LLM behavior"
     type: str
-  optimizer_constraint:
+  - name: optimizer_constraint
     description: "Constraint string that specifies the required answer format"
     type: str
-  # You may define more arguments as needed...
 returns:
-  # Define the outputs of the task here, in the same way as the arguments are defined.
-  # Here, we just define a single output "features", but you may define more as needed.
-  optimized_answers:
+  - name: optimized_answers
     description: "A list of optimized answers, each ending with 'Answer: $LETTER'"
     type: list
 example:
-  # Below, we define an example invocation of the task, i.e. a specific input to the tool.
-  # This section is required, and it consists of "arguments" and "mount" (see below).
   arguments:
-    # For each input argument, specify the value to be used for the example invocation.
-    csv_path: /mount/input/sample_0.csv
-    backward_engine: gpt-4o
-    forward_engine: gpt-4o
-    starting_system_prompt: |
-      You are ChatGPT, a large language model trained by OpenAI, based on the GPT-4 architecture.
-      Knowledge cutoff: 2023-12
-      Current date: 2024-04-01
-    optimizer_constraint: |
-      You must end your answer with a separate line like: 'Answer: A', 'Answer: B', 'Answer: C', or 'Answer: D'. 
-      Do NOT include any additional explanation or diagnosis after 'Answer: $LETTER'.
+    - name: csv_path
+      value: /mount/input/sample_0.csv
+    - name: backward_engine
+      value: gpt-4o
+    - name: forward_engine
+      value: gpt-4o
+    - name: starting_system_prompt
+      value: |
+        You are ChatGPT, a large language model trained by OpenAI, based on the GPT-4 architecture.
+        Knowledge cutoff: 2023-12
+        Current date: 2024-04-01
+    - name: optimizer_constraint
+      value: |
+        You must end your answer with a separate line like: 'Answer: A', 'Answer: B', 'Answer: C', or 'Answer: D'. 
+        Do NOT include any additional explanation or diagnosis after 'Answer: $LETTER'.
   mount:
-    # In this section, you can specify files or folders that should be mounted from the data directory to the container (at "/mount/input" in the container).
-    # The format is key: value, where key is the name of the file or folder and value is the path to the file or folder in the data directory.
-    # For example, the following line mounts the file "TUM-TCGA-ACRLPPQE.tif" from the data directory to the container, placing it at the path "/mount/input/TUM-TCGA-ACRLPPQE.tif" in the container.
-    sample_0.csv: sample_0.csv
+    - source: sample_0.csv
+      target: sample_0.csv
 test_invocations:
-  # Below, we define test invocations for the task.
-  # Each test invocation is a dictionary with the keys "arguments" and "mount", like the example invocation above.
-  # The test invocations can be used in the unit tests to check that the task is working as expected.
-  # Below, we define 3 test invocations for the task, named "tif", "png", and "jpg". 
-  # It is recommended that you define at least 3 test invocations (of course, you can choose any names you want).
-  sample_0:
+  - name: sample_0
     arguments:
-      csv_path: /mount/input/sample_0.csv
-      backward_engine: gpt-4o
-      forward_engine: gpt-4
-      starting_system_prompt: |
-        You are ChatGPT, a large language model trained by OpenAI, based on the GPT-4 architecture.
-        Knowledge cutoff: 2023-12
-        Current date: 2024-04-01
-      optimizer_constraint: |
-        You must end your answer with a separate line like: 'Answer: A', 'Answer: B', 'Answer: C', or 'Answer: D'. 
-        Do NOT include any additional explanation or diagnosis after 'Answer: $LETTER'.
+      - name: csv_path
+        value: /mount/input/sample_0.csv
+      - name: backward_engine
+        value: gpt-4o
+      - name: forward_engine
+        value: gpt-4
+      - name: starting_system_prompt
+        value: |
+          You are ChatGPT, a large language model trained by OpenAI, based on the GPT-4 architecture.
+          Knowledge cutoff: 2023-12
+          Current date: 2024-04-01
+      - name: optimizer_constraint
+        value: |
+          You must end your answer with a separate line like: 'Answer: A', 'Answer: B', 'Answer: C', or 'Answer: D'. 
+          Do NOT include any additional explanation or diagnosis after 'Answer: $LETTER'.
     mount:
-      sample_0.csv: sample_0.csv
-
-  sample_1:
+      - source: sample_0.csv
+        target: sample_0.csv
+  - name: sample_1
     arguments:
-      csv_path: /mount/input/sample_1.csv
-      backward_engine: gpt-4o
-      forward_engine: gpt-4
-      starting_system_prompt: |
-        You are ChatGPT, a large language model trained by OpenAI, based on the GPT-4 architecture.
-        Knowledge cutoff: 2023-12
-        Current date: 2024-04-01
-      optimizer_constraint: |
-        You must end your answer with a separate line like: 'Answer: A', 'Answer: B', 'Answer: C', or 'Answer: D'. 
-        Do NOT include any additional explanation or diagnosis after 'Answer: $LETTER'.
+      - name: csv_path
+        value: /mount/input/sample_1.csv
+      - name: backward_engine
+        value: gpt-4o
+      - name: forward_engine
+        value: gpt-4
+      - name: starting_system_prompt
+        value: |
+          You are ChatGPT, a large language model trained by OpenAI, based on the GPT-4 architecture.
+          Knowledge cutoff: 2023-12
+          Current date: 2024-04-01
+      - name: optimizer_constraint
+        value: |
+          You must end your answer with a separate line like: 'Answer: A', 'Answer: B', 'Answer: C', or 'Answer: D'. 
+          Do NOT include any additional explanation or diagnosis after 'Answer: $LETTER'.
     mount:
-      sample_1.csv: sample_1.csv
-
-  sample_2:
+      - source: sample_1.csv
+        target: sample_1.csv
+  - name: sample_2
     arguments:
-      csv_path: /mount/input/sample_2.csv
-      backward_engine: gpt-4o
-      forward_engine: gpt-4
-      starting_system_prompt: |
-        You are ChatGPT, a large language model trained by OpenAI, based on the GPT-4 architecture.
-        Knowledge cutoff: 2023-12
-        Current date: 2024-04-01
-      optimizer_constraint: |
-        You must end your answer with a separate line like: 'Answer: A', 'Answer: B', 'Answer: C', or 'Answer: D'. 
-        Do NOT include any additional explanation or diagnosis after 'Answer: $LETTER'.
+      - name: csv_path
+        value: /mount/input/sample_2.csv
+      - name: backward_engine
+        value: gpt-4o
+      - name: forward_engine
+        value: gpt-4
+      - name: starting_system_prompt
+        value: |
+          You are ChatGPT, a large language model trained by OpenAI, based on the GPT-4 architecture.
+          Knowledge cutoff: 2023-12
+          Current date: 2024-04-01
+      - name: optimizer_constraint
+        value: |
+          You must end your answer with a separate line like: 'Answer: A', 'Answer: B', 'Answer: C', or 'Answer: D'. 
+          Do NOT include any additional explanation or diagnosis after 'Answer: $LETTER'.
     mount:
-      sample_2.csv: sample_2.csv
+      - source: sample_2.csv
+        target: sample_2.csv
 

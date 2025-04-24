@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Literal, Self
 
 import yaml
-from pydantic import BaseModel, Field, create_model
+from pydantic import BaseModel, Field, create_model, model_validator
 from pydantic_settings import BaseSettings
 
 from toolarena.utils import substitute_env_vars
@@ -27,13 +27,29 @@ argument_type_map: Mapping[ArgumentTypeName, type] = {
 
 
 class ArgumentDefinition(BaseModel):
+    name: str
     description: str
     type: ArgumentTypeName
 
 
+class ArgumentValue(BaseModel):
+    name: str
+    value: ArgumentType
+
+
+class Mount(BaseModel):
+    source: str
+    target: str
+
+
 class ToolInvocation(BaseModel):
-    arguments: Mapping[str, ArgumentType]
-    mount: Mapping[str, str] = Field(default_factory=dict)
+    name: str
+    arguments: Sequence[ArgumentValue]
+    mount: Sequence[Mount] = Field(default_factory=list)
+
+
+class ExampleInvocation(ToolInvocation):
+    name: Literal["example"] = "example"
 
 
 class Repository(BaseModel):
@@ -77,13 +93,36 @@ class ToolDefinition(BaseSettings):
     papers: Sequence[str]
     category: str
     description: str
-    arguments: Mapping[str, ArgumentDefinition]
-    returns: Mapping[str, ArgumentDefinition]
-    example: ToolInvocation
-    test_invocations: Mapping[str, ToolInvocation] = Field(default_factory=dict)
+    arguments: Sequence[ArgumentDefinition]
+    returns: Sequence[ArgumentDefinition]
+    example: ExampleInvocation | None = None
+    test_invocations: Sequence[ToolInvocation] = Field(default_factory=list)
     note: str | None = (
         None  # additional information about this task (will not be shown to the model)
     )
+
+    def _validate_invocation(self, invocation: ToolInvocation) -> None:
+        defined_arg_names = {arg.name for arg in self.arguments}
+        invocation_arg_names = {arg.name for arg in invocation.arguments}
+        if invocation_arg_names != defined_arg_names:
+            raise ValueError(
+                f"Invocation {invocation.name} arguments {invocation_arg_names} do not match defined arguments {defined_arg_names}"
+            )
+
+    @model_validator(mode="after")
+    def validate_example(self) -> Self:
+        if self.example is None:
+            return self
+        if self.example.name != "example":
+            raise ValueError("Example invocation must be named 'example'")
+        self._validate_invocation(self.example)
+        return self
+
+    @model_validator(mode="after")
+    def validate_invocation_arguments(self) -> Self:
+        for invocation in self.test_invocations:
+            self._validate_invocation(invocation)
+        return self
 
     @classmethod
     def from_yaml(cls, path: Path | str) -> Self:
@@ -91,15 +130,15 @@ class ToolDefinition(BaseSettings):
 
     def _arg_str(self) -> str:
         return ", ".join(
-            f"{name}: {arg.type} = {self.example.arguments[name]!r}"
-            for name, arg in self.arguments.items()
+            f"{arg.name}: {arg.type} = {next(a for a in self.example.arguments if a.name == arg.name).value!r}"
+            for arg in self.arguments
         )
 
     def description_of_returns(self) -> str:
         if self.returns:
             return f"""dict with the following structure:
 {{
-{"\n".join(f"  {key!r}: {arg.type}  # {arg.description}" for key, arg in self.returns.items())}
+{"\n".join(f"  {arg.name!r}: {arg.type}  # {arg.description}" for arg in self.returns)}
 }}"""
         return "empty dict"
 
@@ -111,7 +150,7 @@ class ToolDefinition(BaseSettings):
 {indent}{self.description.replace("\n", f"\n{indent}")}
 {indent}
 {indent}Args:
-{"\n".join(f"{indent}    {name}: {arg.description}" for name, arg in self.arguments.items())}
+{"\n".join(f"{indent}    {arg.name}: {arg.description}" for arg in self.arguments)}
 {indent}
 {indent}Returns:
 {indent}    {self.description_of_returns().replace("\n", f"\n{indent}    ")}
@@ -122,8 +161,11 @@ class ToolDefinition(BaseSettings):
         return create_model(  # type: ignore
             name,
             **{
-                k: (argument_type_map[v.type], Field(description=v.description))
-                for k, v in self.arguments.items()
+                arg.name: (
+                    argument_type_map[arg.type],
+                    Field(description=arg.description),
+                )
+                for arg in self.arguments
             },
         )
 

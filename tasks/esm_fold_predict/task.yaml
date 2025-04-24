@@ -8,29 +8,33 @@ category: genomics_proteomics
 description: >-
   Generate the representation of a protein sequence and the contact map using Facebook Research's pretrained esm2_t33_650M_UR50D model.
 arguments:
-  sequence:
+  - name: sequence
     description: Protein sequence to for which to generate representation and contact map.
     type: str
 returns:
-  sequence_representation:
+  - name: sequence_representation
     description: Token representations for the protein sequence as a list of floats, i.e. a 1D array of shape L where L is the number of tokens.
     type: list
-  contact_map:
+  - name: contact_map
     description: Contact map for the protein sequence as a list of list of floats, i.e. a 2D array of shape LxL where L is the number of tokens.
     type: list
 example:
   arguments:
-    sequence: "MKTVRQERLKSIVRILERSKEPVSGAQLAEELSVSRQVIVQDIAYLRSLGYNIVATPRGYVLAGG"
+    - name: sequence
+      value: "MKTVRQERLKSIVRILERSKEPVSGAQLAEELSVSRQVIVQDIAYLRSLGYNIVATPRGYVLAGG"
 test_invocations:
-  protein2:
+  - name: protein2
     arguments:
-      sequence: "KALTARQQEVFDLIRDHISQTGMPPTRAEIAQRLGFRSPNAAEEHLKALARKGVIEIVSGASRGIRLLQEE"
-  protein2_with_mask:
+      - name: sequence
+        value: "KALTARQQEVFDLIRDHISQTGMPPTRAEIAQRLGFRSPNAAEEHLKALARKGVIEIVSGASRGIRLLQEE"
+  - name: protein2_with_mask
     arguments:
-      sequence: "KALTARQQEVFDLIRD<mask>ISQTGMPPTRAEIAQRLGFRSPNAAEEHLKALARKGVIEIVSGASRGIRLLQEE"
-  protein3:
+      - name: sequence
+        value: "KALTARQQEVFDLIRD<mask>ISQTGMPPTRAEIAQRLGFRSPNAAEEHLKALARKGVIEIVSGASRGIRLLQEE"
+  - name: protein3
     arguments:
-      sequence: "K A <mask> I S Q"
+      - name: sequence
+        value: "K A <mask> I S Q"
 note: >-
   This repository does not contain any simple CLI functions, but examples. 
   We ask the model to re-implement one of the examples.

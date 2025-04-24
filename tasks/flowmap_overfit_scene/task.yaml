@@ -7,29 +7,35 @@ papers: [smith2024flowmap]
 category: 3d_vision
 description: Overfit FlowMap on an input scene to determine camera extrinsics for each frame in the scene.
 arguments:
-  input_scene:
+  - name: input_scene
     description: Path to the directory containing the images of the input scene (just the image files, nothing else)
     type: str
 returns:
-  "n":
+  - name: "n"
     description: The number of images (frames) in the scene
     type: int
-  camera_extrinsics:
+  - name: camera_extrinsics
     description: The camera extrinsics matrix for each of the n frames in the scene, must have a shape of nx4x4 (as a nested python list of floats)
     type: list
 example:
   arguments:
-    input_scene: /mount/input/llff_flower
+    - name: input_scene
+      value: /mount/input/llff_flower
   mount:
-    flowmap/llff_flower: llff_flower
+    - source: flowmap/llff_flower
+      target: llff_flower
 test_invocations:
-  llff_fern:
+  - name: llff_fern
     arguments:
-      input_scene: /mount/input/llff_fern
+      - name: input_scene
+        value: /mount/input/llff_fern
     mount:
-      flowmap/llff_fern: llff_fern
-  llff_orchids:
+      - source: flowmap/llff_fern
+        target: llff_fern
+  - name: llff_orchids
     arguments:
-      input_scene: /mount/input/llff_orchids
+      - name: input_scene
+        value: /mount/input/llff_orchids
     mount:
-      flowmap/llff_orchids: llff_orchids
+      - source: flowmap/llff_orchids
+        target: llff_orchids

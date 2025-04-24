@@ -8,40 +8,52 @@ category: genomics_proteomics
 description: >-
   Initialize the Cytopus KnowledgeBase and generate a JSON file containing a nested dictionary with gene set annotations organized by cell type, suitable for input into the Spectra library.
 arguments:
-  celltype_of_interest:
+  - name: celltype_of_interest
     description: List of cell types for which to retrieve gene sets
     type: list
-  global_celltypes:
+  - name: global_celltypes
     description: List of global cell types to include in the JSON file.
     type: list
-  output_file:
+  - name: output_file
     description: Path to the file where the output JSON file should be stored.
     type: str
 returns:
-  keys:
+  - name: keys
     description: The list of keys in the produced JSON file.
     type: list
 example:
   arguments:
-    celltype_of_interest: ["B_memory", "B_naive", "CD4_T", "CD8_T", "DC", "ILC3", "MDC", "NK", "Treg", "gdT", "mast", "pDC", "plasma"]
-    global_celltypes: ["all-cells", "leukocyte"]
-    output_file: /mount/output/Spectra_dict.json
+    - name: celltype_of_interest
+      value: ["B_memory", "B_naive", "CD4_T", "CD8_T", "DC", "ILC3", "MDC", "NK", "Treg", "gdT", "mast", "pDC", "plasma"]
+    - name: global_celltypes
+      value: ["all-cells", "leukocyte"]
+    - name: output_file
+      value: /mount/output/Spectra_dict.json
 test_invocations:
-  B_and_CD4_T:
+  - name: B_and_CD4_T
     arguments:
-      celltype_of_interest: ["B", "CD4_T"]
-      global_celltypes: ["all-cells", "leukocyte"]
-      output_file: /mount/output/Spectra_dict.json
-  leukocytes:
+      - name: celltype_of_interest
+        value: ["B", "CD4_T"]
+      - name: global_celltypes
+        value: ["all-cells", "leukocyte"]
+      - name: output_file
+        value: /mount/output/Spectra_dict.json
+  - name: leukocytes
     arguments:
-      celltype_of_interest: ["B_memory", "B_naive", "CD4_T", "CD8_T", "DC", "ILC3", "MDC", "NK", "Treg", "gdT", "mast", "pDC", "plasma"]
-      global_celltypes: ["leukocyte"]
-      output_file: /mount/output/Spectra_dict.json
-  Treg_and_plasma_and_B_naive:
+      - name: celltype_of_interest
+        value: ["B_memory", "B_naive", "CD4_T", "CD8_T", "DC", "ILC3", "MDC", "NK", "Treg", "gdT", "mast", "pDC", "plasma"]
+      - name: global_celltypes
+        value: ["leukocyte"]
+      - name: output_file
+        value: /mount/output/Spectra_dict.json
+  - name: Treg_and_plasma_and_B_naive
     arguments:
-      celltype_of_interest: ["Treg", "plasma", "B_naive"]
-      global_celltypes: ["leukocyte"]
-      output_file: /mount/output/Spectra_dict.json
+      - name: celltype_of_interest
+        value: ["Treg", "plasma", "B_naive"]
+      - name: global_celltypes
+        value: ["leukocyte"]
+      - name: output_file
+        value: /mount/output/Spectra_dict.json
 note: >
   The information on how to do this is in:
   https://github.com/wallet-maker/cytopus/blob/main/notebooks/KnowledgeBase_queries_colaboratory.ipynb

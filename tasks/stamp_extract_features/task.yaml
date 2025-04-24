@@ -7,38 +7,50 @@ papers: [elnahhas2024stamp]
 category: pathology
 description: Perform feature extraction using CTransPath with STAMP on a set of whole slide images, saving the resulting features to the specified output directory.
 arguments:
-  output_dir:
+  - name: output_dir
     description: Path to the output folder where the features will be saved
     type: str
-  slide_dir:
+  - name: slide_dir
     description: Path to the input folder containing the whole slide images
     type: str
 returns:
-  num_processed_slides:
+  - name: num_processed_slides
     description: The number of slides that were processed
     type: int
 example:
   arguments:
-    output_dir: /mount/output/TCGA-BRCA-features
-    slide_dir: /mount/input/TCGA-BRCA-SLIDES
+    - name: output_dir
+      value: /mount/output/TCGA-BRCA-features
+    - name: slide_dir
+      value: /mount/input/TCGA-BRCA-SLIDES
   mount:
-    "brca": "TCGA-BRCA-SLIDES"
+    - source: brca
+      target: TCGA-BRCA-SLIDES
 test_invocations:
-  crc:
+  - name: crc
     arguments:
-      output_dir: /mount/output/TCGA-CRC-features
-      slide_dir: /mount/input/TCGA-CRC-SLIDES
+      - name: output_dir
+        value: /mount/output/TCGA-CRC-features
+      - name: slide_dir
+        value: /mount/input/TCGA-CRC-SLIDES
     mount:
-      "crc": "TCGA-CRC-SLIDES"
-  crc_single:
+      - source: crc
+        target: TCGA-CRC-SLIDES
+  - name: crc_single
     arguments:
-      output_dir: /mount/output/TCGA-CRC-features
-      slide_dir: /mount/input/TCGA-CRC-SLIDES
+      - name: output_dir
+        value: /mount/output/TCGA-CRC-features
+      - name: slide_dir
+        value: /mount/input/TCGA-CRC-SLIDES
     mount:
-      "crc/TCGA-4N-A93T-01Z-00-DX1.82E240B1-22C3-46E3-891F-0DCE35C43F8B.svs": "TCGA-CRC-SLIDES/TCGA-4N-A93T-01Z-00-DX1.82E240B1-22C3-46E3-891F-0DCE35C43F8B.svs"
-  brca_single:
+      - source: crc/TCGA-4N-A93T-01Z-00-DX1.82E240B1-22C3-46E3-891F-0DCE35C43F8B.svs
+        target: TCGA-CRC-SLIDES/TCGA-4N-A93T-01Z-00-DX1.82E240B1-22C3-46E3-891F-0DCE35C43F8B.svs
+  - name: brca_single
     arguments:
-      output_dir: /mount/output/TCGA-BRCA-features
-      slide_dir: /mount/input/TCGA-BRCA-SLIDES
+      - name: output_dir
+        value: /mount/output/TCGA-BRCA-features
+      - name: slide_dir
+        value: /mount/input/TCGA-BRCA-SLIDES
     mount:
-      "brca/TCGA-BH-A0BZ-01Z-00-DX1.45EB3E93-A871-49C6-9EAE-90D98AE01913.svs": "TCGA-BRCA-SLIDES/TCGA-BH-A0BZ-01Z-00-DX1.45EB3E93-A871-49C6-9EAE-90D98AE01913.svs"
+      - source: brca/TCGA-BH-A0BZ-01Z-00-DX1.45EB3E93-A871-49C6-9EAE-90D98AE01913.svs
+        target: TCGA-BRCA-SLIDES/TCGA-BH-A0BZ-01Z-00-DX1.45EB3E93-A871-49C6-9EAE-90D98AE01913.svs

@@ -77,7 +77,7 @@ from toolarena.run import ToolRunResult
 initialize()
 
 
-@parametrize_invocation({", ".join(('"' + k + '"') for k in definition.test_invocations.keys())})
+@parametrize_invocation({", ".join(('"' + invocation.name + '"') for invocation in definition.test_invocations)})
 def test_status(invocation: ToolRunResult):
     assert invocation.status == "success"
 
@@ -140,27 +140,20 @@ def run(
     tool = build(name=name, implementation=implementation)
 
     if invocation:
-        invocations = [
-            (
-                invocation,
-                tool.definition.example
-                if invocation == "example"
-                else tool.definition.test_invocations[invocation],
-            )
-        ]
+        invocations = [tool.get_invocation(invocation)]
     else:
         invocations = [
-            ("example", tool.definition.example),
-            *tool.definition.test_invocations.items(),
+            tool.definition.example,
+            *tool.definition.test_invocations,
         ]
-    for invocation_name, invocation in invocations:
-        logger.info(f"Running {invocation_name} for {name}")
+    for invocation in invocations:
+        logger.info(f"Running {invocation.name} for {name}")
         result = tool.run(
             invocation, data_dir=TASKS_DIR / name / "data", cache_root=cache
         )
         status_style = "green" if result.status == "success" else "red"
         print(
-            f"Tool [bold]{name}[/bold] invocation [bold]{invocation_name}[/bold] finished with status {Text(result.status, style=f'bold {status_style}').markup}"
+            f"Tool [bold]{name}[/bold] invocation [bold]{invocation.name}[/bold] finished with status {Text(result.status, style=f'bold {status_style}').markup}"
         )
         print(
             Panel(
