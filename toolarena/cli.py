@@ -196,9 +196,7 @@ def debug(
     definition = ToolDefinition.from_yaml(task_file)
     runner = ToolRunner.from_paths(
         task_file=task_file,
-        invocation=definition.example
-        if invocation is None or invocation == "example"
-        else definition.test_invocations[invocation],
+        invocation=definition.get_invocation(invocation),
         data_dir=task_dir / "data",
         install_script=implementation_dir / "install.sh",
         code_implementation=implementation_dir / "implementation.py",

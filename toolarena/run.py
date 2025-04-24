@@ -143,7 +143,7 @@ class ToolRunner(BaseModel):
     def run_without_cache(self, image: Image | None = None) -> ToolResult:
         """Run tool without using cache. If image is not provided, build it."""
         client = self.start_client(image)
-        return client.run(**self.invocation.arguments)
+        return client.run(**{arg.name: arg.value for arg in self.invocation.arguments})
 
     def run(self, image: Image | None = None) -> ToolRunResult:
         """Build image and run tool, using cache if available."""

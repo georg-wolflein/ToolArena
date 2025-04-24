@@ -1,12 +1,15 @@
-from tasks.utils import initialize, parametrize_invocation
-from toolarena.run import ToolRunResult
 import re
 
+from tasks.utils import initialize, parametrize_invocation
+from toolarena.run import ToolRunResult
+
 initialize()
+
 
 @parametrize_invocation("sample_0", "sample_1", "sample_2")
 def test_status(invocation: ToolRunResult):
     assert invocation.status == "success"
+
 
 @parametrize_invocation("sample_0", "sample_1", "sample_2")
 def test_output_format(invocation: ToolRunResult):
@@ -21,6 +24,7 @@ def test_output_format(invocation: ToolRunResult):
         assert "init_answer" in entry
         assert "optimized_answer" in entry
         assert isinstance(entry["optimized_answer"], str)
+
 
 @parametrize_invocation("sample_0", "sample_1", "sample_2")
 def test_answer_format(invocation: ToolRunResult):

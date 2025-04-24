@@ -57,6 +57,9 @@ class HTTPToolClient:
         return f"http://{self.host}:{self.port}"
 
     def run(self, **kwargs: ArgumentType) -> ToolResult:
+        logger.info(
+            f"Running tool with arguments: {', '.join(f'{k}={v!r}' for k, v in kwargs.items())}"
+        )
         response = self.http_client.post(f"{self.url}/run", json=kwargs)
         return ToolResult.model_validate_json(response.text)
 

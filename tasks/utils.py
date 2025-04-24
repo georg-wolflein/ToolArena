@@ -20,7 +20,6 @@ type InvocationFixture = Callable[[ToolFixture], ToolRunResult]
 
 def _invocation_fixture(
     tool_name: str,
-    invocation_name: str,
     invocation: ToolInvocation,
     module: str,
     prefix: str | None = None,
@@ -42,12 +41,12 @@ def _invocation_fixture(
             and not runner.is_cached()
         ):
             pytest.skip(
-                f"Skipping uncached invocation {invocation_name} for {full_tool_name}"
+                f"Skipping uncached invocation {invocation.name} for {full_tool_name}"
             )
         return runner.run()
 
-    fixture.__name__ = invocation_name
-    fixture.__doc__ = f"Test invocation {invocation_name} for {full_tool_name}."
+    fixture.__name__ = invocation.name
+    fixture.__doc__ = f"Test invocation {invocation.name} for {full_tool_name}."
     fixture.__module__ = module
 
     return pytest.fixture(
@@ -58,7 +57,7 @@ def _invocation_fixture(
                 None,
                 marks=[
                     pytest.mark.tool_invocation(
-                        prefix=prefix, tool=tool_name, invocation=invocation_name
+                        prefix=prefix, tool=tool_name, invocation=invocation.name
                     )
                 ],
             )
@@ -80,9 +79,9 @@ def _get_fixtures(tool_name: str) -> Mapping[str, ToolFixture | InvocationFixtur
     module = f"tasks.{tool_name}.tests"
     fixtures = {}
     definition = ToolDefinition.from_yaml(TASKS_DIR / tool_name / "task.yaml")
-    for invocation_name, invocation in definition.test_invocations.items():
-        fixtures[invocation_name] = _invocation_fixture(
-            tool_name, invocation_name, invocation, module=module
+    for invocation in definition.test_invocations:
+        fixtures[invocation.name] = _invocation_fixture(
+            tool_name, invocation, module=module
         )
     return fixtures
 
