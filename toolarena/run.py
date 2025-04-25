@@ -173,18 +173,3 @@ class ToolRunner(BaseModel):
 
     def is_cached(self) -> bool:
         return self.cache_file.exists()
-
-    def get_invocation(self, name: str) -> ToolInvocation:
-        if name == "example":
-            return self.definition.example
-        else:
-            try:
-                return next(
-                    invocation
-                    for invocation in self.definition.test_invocations
-                    if invocation.name == name
-                )
-            except StopIteration:
-                raise ValueError(
-                    f"Invocation {name} not found; available invocations: {', '.join(['example'] + [invocation.name for invocation in self.definition.test_invocations])}"
-                )

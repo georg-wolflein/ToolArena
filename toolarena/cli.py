@@ -140,7 +140,7 @@ def run(
     tool = build(name=name, implementation=implementation)
 
     if invocation:
-        invocations = [tool.get_invocation(invocation)]
+        invocations = [tool.definition.get_invocation(invocation)]
     else:
         invocations = [
             tool.definition.example,

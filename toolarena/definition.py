@@ -157,6 +157,21 @@ class ToolDefinition(BaseSettings):
 {indent}\"\"\"
 """
 
+    def get_invocation(self, name: str) -> ToolInvocation:
+        if name == "example":
+            return self.example
+        else:
+            try:
+                return next(
+                    invocation
+                    for invocation in self.test_invocations
+                    if invocation.name == name
+                )
+            except StopIteration:
+                raise ValueError(
+                    f"Invocation {name} not found; available invocations: {', '.join(['example'] + [invocation.name for invocation in self.test_invocations])}"
+                )
+
     def args_to_pydantic(self, name: str = "ToolCall") -> BaseModel:
         return create_model(  # type: ignore
             name,
