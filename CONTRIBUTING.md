@@ -80,7 +80,7 @@ Each task in ToolArena consists of:
    This will create a virtual environment at `.venv/`.
 3. Activate the virtual environment:
    ```bash
-   ./venv/bin/activate
+   source .venv/bin/activate
    ```
 4. Check that the installation succeeded by verifying that the `toolarena` command exists:
    ```bash
