@@ -1,7 +1,7 @@
 # The tag is either cpu or cuda
 ARG TAG=cpu
 
-FROM ghcr.io/georg-wolflein/toolarena:main-${TAG}
+FROM ghcr.io/georg-wolflein/toolarena:${TAG}
 
 # Use bash (so we can use the "." command)
 SHELL ["/bin/bash", "-c"]
