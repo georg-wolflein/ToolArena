@@ -4,6 +4,21 @@
 ARG BASE=ubuntu:24.04
 FROM ${BASE}
 
+# Install basic dependencies (according to buildpack-deps:24.04)
+RUN apt-get update && \
+    apt-get install -y \
+      ca-certificates \
+      curl \
+      gnupg \
+      netbase \
+      sq \
+      wget \
+      tzdata \
+      git \
+      make \
+      unzip && \
+    rm -rf /var/lib/apt/lists/*
+
 # Install python
 ARG PYTHON_VERSION=3.12
 RUN apt-get update && \
