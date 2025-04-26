@@ -1,8 +1,6 @@
 /tasks
 /data
 /papers
-/.legacy
-/.cursor
-
-/.env
+/runs
+/.*
 .venv

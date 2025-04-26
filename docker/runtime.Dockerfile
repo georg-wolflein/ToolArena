@@ -1,5 +1,17 @@
 # This image is published to ghcr.io/georg-wolflein/toolarena-runtime
-FROM python:3.12
+
+# The base image is either ubuntu:24.04 (for CPU) or nvidia/cuda:12.8.1-cudnn-devel-ubuntu24.04 (for GPU)
+ARG BASE=ubuntu:24.04
+FROM ${BASE}
+
+# Install python
+ARG PYTHON_VERSION=3.12
+RUN apt-get update && \
+    apt-get install -y software-properties-common && \
+    add-apt-repository ppa:deadsnakes/ppa && \
+    apt-get update && \
+    apt-get install -y python${PYTHON_VERSION} && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install uv
 COPY --from=ghcr.io/astral-sh/uv:0.6 /uv /uvx /bin/
@@ -12,7 +24,6 @@ RUN uv sync --frozen --no-install-project
 
 COPY toolarena ./toolarena
 
-RUN mkdir -p /workspace
 WORKDIR /workspace
 
 COPY scripts/subprocess_utils.py /toolarena/subprocess_utils.py
