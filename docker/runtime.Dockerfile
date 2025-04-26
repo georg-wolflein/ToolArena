@@ -26,7 +26,8 @@ RUN apt-get update && \
     add-apt-repository ppa:deadsnakes/ppa && \
     apt-get update && \
     apt-get install -y python${PYTHON_VERSION} python3-pip && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* && \
+    python3 -m pip config set global.break-system-packages true
 
 # Install uv
 COPY --from=ghcr.io/astral-sh/uv:0.6 /uv /uvx /bin/
