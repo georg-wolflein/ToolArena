@@ -5,6 +5,7 @@ repo:
   commit: 2b36991
 papers: [verkuil2022esm1, hie2022esm2]
 category: genomics_proteomics
+requires: cuda
 description: >-
   Generate the representation of a protein sequence and the contact map using Facebook Research's pretrained esm2_t33_650M_UR50D model.
 arguments:

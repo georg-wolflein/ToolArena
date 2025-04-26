@@ -39,7 +39,11 @@ def build_tool(
         temp_dir_path.joinpath(".env").touch()
         for key, value in environment.items():
             dotenv.set_key(temp_dir_path / ".env", key, value)
-        image, logs = build_image(tag=definition.name, context=temp_dir_path)
+        image, logs = build_image(
+            tag=definition.name,
+            context=temp_dir_path,
+            buildargs={"TAG": definition.requires},  # will build CUDA image if required
+        )
         return ToolImplementation(
             definition=definition,
             image=image,

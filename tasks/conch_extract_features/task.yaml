@@ -7,6 +7,7 @@ repo:
     HF_TOKEN: "${env:HF_TOKEN}"  # required for downloading models
 papers: [lu2024conch]
 category: pathology
+requires: cuda
 description: Perform feature extraction on an input image using CONCH.
 arguments:
   - name: input_image

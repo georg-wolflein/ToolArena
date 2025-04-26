@@ -5,8 +5,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Literal, Self
 
 import yaml
-from pydantic import BaseModel, Field, create_model, model_validator
-from pydantic_settings import BaseSettings
+from pydantic import BaseModel, ConfigDict, Field, create_model, model_validator
 
 from toolarena.utils import substitute_env_vars
 
@@ -87,9 +86,12 @@ class Repository(BaseModel):
         return {k: substitute_env_vars(v, env) for k, v in self.env.items()}
 
 
-class ToolDefinition(BaseSettings):
+class ToolDefinition(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
     name: str
     repo: Repository
+    requires: Literal["cpu", "cuda"] = "cpu"
     papers: Sequence[str]
     category: str
     description: str

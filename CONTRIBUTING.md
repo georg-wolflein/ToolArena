@@ -88,7 +88,8 @@ Each task in ToolArena consists of:
    ```
 5. Install [Docker](https://docs.docker.com/desktop) and pull the latest ToolArena image:
    ```bash
-   docker pull ghcr.io/georg-wolflein/toolarena:main
+   docker pull ghcr.io/georg-wolflein/toolarena:cpu
+   docker pull ghcr.io/georg-wolflein/toolarena:cuda  # (only required if your task requires GPU)
    ```
 6. Create a `.env` file at the root of the repository (it can be empty for now):
    ```bash
@@ -129,7 +130,7 @@ Take special care to come up with a task `description`, and make sure all `argum
 > You can use an existing task in `tasks/` as a reference (for instance, [`tasks/conch_extract_features/task.yaml`](tasks/conch_extract_features/task.yaml)).
 
 ### Key sections to include
-At this point, you should at least define the following parts (the `config.yaml` file includes extensive documentation in the form of comments to help you):
+At this point, you should at least define the following parts (the `task.yaml` file includes extensive documentation in the form of comments to help you):
 1. **`name`**: matches the folder name (e.g., `mynifty_task`).
 2. **`description`**: One or two sentences describing what your tool does.
 3. **`repo`**: your should wrap functionality from a GitHub repository, so please specify:
@@ -144,6 +145,9 @@ At this point, you should at least define the following parts (the `config.yaml`
    ```
 4. **`arguments`**: inputs your tool expects.
 5. **`returns`**: outputs your tool produces.
+
+> [!IMPORTANT]  
+> If your task requires a GPU, ensure you set `requies: cuda` in the `task.yaml` file.
 
 ### Define environment variables (optional)
 In the `env` section of `repo`, you may optionally define environment variables that should be set for the tool.

@@ -159,6 +159,7 @@ def build_image(
     tag: str,
     context: Path | str,
     dockerfile: Path | str = TOOL_DOCKERFILE,
+    buildargs: Mapping[str, str] = {},
 ) -> tuple[Image, Iterator[Mapping[str, str]]]:
     """Build an image using Docker BuildKit via the low-level Docker API.
 
@@ -173,6 +174,7 @@ def build_image(
         buildargs={
             "DOCKER_BUILDKIT": "1",
             # "BUILDKIT_PROGRESS": "plain",
+            **buildargs,
         },
     )
 

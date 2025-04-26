@@ -48,9 +48,10 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for a full guide on how to contribute a n
    ```bash
    toolarena --help
    ```
-5. **Install [Docker](https://docs.docker.com/desktop)**, then **pull the latest ToolArena image**:
+5. **Install [Docker](https://docs.docker.com/desktop)**, then **pull the latest ToolArena images**:
    ```bash
-   docker pull ghcr.io/georg-wolflein/toolarena:main
+   docker pull ghcr.io/georg-wolflein/toolarena:cpu
+   docker pull ghcr.io/georg-wolflein/toolarena:cuda
    ```
 
 ### Environment setup

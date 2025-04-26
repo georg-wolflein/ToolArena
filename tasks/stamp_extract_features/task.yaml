@@ -5,6 +5,7 @@ repo:
   commit: 0042e6f
 papers: [elnahhas2024stamp]
 category: pathology
+requires: cuda
 description: Perform feature extraction using CTransPath with STAMP on a set of whole slide images, saving the resulting features to the specified output directory.
 arguments:
   - name: output_dir

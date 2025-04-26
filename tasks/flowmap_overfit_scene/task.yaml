@@ -5,6 +5,7 @@ repo:
   commit: 578a515
 papers: [smith2024flowmap]
 category: 3d_vision
+requires: cuda
 description: Overfit FlowMap on an input scene to determine camera extrinsics for each frame in the scene.
 arguments:
   - name: input_scene
