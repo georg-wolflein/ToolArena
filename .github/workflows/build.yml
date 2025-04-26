@@ -35,6 +35,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
+            type=raw,value=${{ github.ref_name }},enable=${{ inputs.tag == 'cpu' }}
             type=raw,value=${{ github.ref_name }}-${{ inputs.tag }}
             type=raw,value=${{ github.ref_name }}-${{ inputs.tag }}-${{ github.run_number }}
       - name: Build and push Docker image
