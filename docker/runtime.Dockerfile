@@ -27,7 +27,8 @@ RUN apt-get update && \
     apt-get update && \
     apt-get install -y python${PYTHON_VERSION} python3-pip && \
     rm -rf /var/lib/apt/lists/* && \
-    python3 -m pip config set global.break-system-packages true
+    python3 -m pip config set global.break-system-packages true && \
+    ln -s /usr/bin/python3 /usr/bin/python
 
 # Install uv
 COPY --from=ghcr.io/astral-sh/uv:0.6 /uv /uvx /bin/
