@@ -4,7 +4,7 @@
 ARG BASE=ubuntu:24.04
 FROM ${BASE}
 
-# Install basic dependencies (according to buildpack-deps:24.04)
+# Install common commands (loosely according to buildpack-deps:24.04)
 RUN apt-get update && \
     apt-get install -y \
       ca-certificates \
@@ -25,7 +25,7 @@ RUN apt-get update && \
     apt-get install -y software-properties-common && \
     add-apt-repository ppa:deadsnakes/ppa && \
     apt-get update && \
-    apt-get install -y python${PYTHON_VERSION} && \
+    apt-get install -y python${PYTHON_VERSION} python3-pip && \
     rm -rf /var/lib/apt/lists/*
 
 # Install uv
