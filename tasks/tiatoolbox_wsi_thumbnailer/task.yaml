@@ -1,0 +1,39 @@
+name: tiatoolbox_wsi_thumbnailer
+repo:
+  name: tiatoolbox
+  url: "https://github.com/TissueImageAnalytics/tiatoolbox"
+  commit: 7ba7394
+papers: [pocock2022tiatoolbox]
+category: pathology
+requires: cpu
+description: Generate a PNG thumbnail for every whole-slide image (WSI) in `input_dir` using TIAToolbox and save them to `output_dir` with the suffix “_thumbnail.png”.
+arguments:
+  - name: input_dir
+    description: Path to the folder that contains the WSIs
+    type: str 
+  - name: output_dir
+    description: Path to the folder where thumbnails are written
+    type: str
+returns:
+  - name: num_thumbnails
+    description: Number of thumbnails created
+    type: int
+example:
+  arguments:
+    - name: input_dir
+      value: /mount/input/wsis
+    - name: output_dir
+      value: /mount/output/wsis_thumbs
+  mount:
+    - source: wsis
+      target: wsis
+test_invocations:
+  - name: small_batch
+    arguments:
+      - name: input_dir
+        value: /mount/input/wsis
+      - name: output_dir
+        value: /mount/output/wsis_thumbs
+    mount:
+      - source: wsis
+        target: wsis
