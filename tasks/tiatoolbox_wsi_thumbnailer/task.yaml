@@ -14,6 +14,12 @@ arguments:
   - name: output_dir
     description: Path to the folder where thumbnails are written
     type: str
+  - name: resolution
+    description: Requested magnification / physical resolution
+    type: float
+  - name: units
+    description: Units for resolution ("power", "mpp", "level", "baseline")
+    type: str
 returns:
   - name: num_thumbnails
     description: Number of thumbnails created
@@ -24,16 +30,52 @@ example:
       value: /mount/input/wsis
     - name: output_dir
       value: /mount/output/wsis_thumbs
+    - name: resolution
+      value: 1.25
+    - name: units
+      value: power
   mount:
     - source: wsis
       target: wsis
 test_invocations:
-  - name: small_batch
+  - name: single_wsi_low_power
     arguments:
-      - name: input_dir
-        value: /mount/input/wsis
-      - name: output_dir
-        value: /mount/output/wsis_thumbs
+    - name: input_dir
+      value: /mount/input/wsis
+    - name: output_dir
+      value: /mount/output/wsis_thumbs
+    - name: resolution
+      value: 0.625
+    - name: units
+      value: power
+    mount:
+      - source: wsis/TCGA-DT-5265-01Z-00-DX1.563f09af-8bbe-45cd-9c6d-85a96255e67f.svs
+        target: wsis/TCGA-DT-5265-01Z-00-DX1.563f09af-8bbe-45cd-9c6d-85a96255e67f.svs
+  - name: two_wsi_at_2mpp
+    arguments:
+    - name: input_dir
+      value: /mount/input/wsis
+    - name: output_dir
+      value: /mount/output/wsis_thumbs
+    - name: resolution
+      value: 2.0
+    - name: units
+      value: mpp
+    mount:
+      - source: wsis/TCGA-AG-A011-01Z-00-DX1.155A4093-5EC6-4D38-8CE1-24C045DF0CD8.svs
+        target: wsis/TCGA-AG-A011-01Z-00-DX1.155A4093-5EC6-4D38-8CE1-24C045DF0CD8.svs
+      - source: wsis/TCGA-EI-6881-01Z-00-DX1.5cfa2929-4374-4166-b110-39ab7d3de7cd.svs
+        target: wsis/TCGA-EI-6881-01Z-00-DX1.5cfa2929-4374-4166-b110-39ab7d3de7cd.svs
+  - name: full_dir_1p25_power
+    arguments:
+    - name: input_dir
+      value: /mount/input/wsis
+    - name: output_dir
+      value: /mount/output/wsis_thumbs
+    - name: resolution
+      value: 1.25
+    - name: units
+      value: power
     mount:
       - source: wsis
         target: wsis

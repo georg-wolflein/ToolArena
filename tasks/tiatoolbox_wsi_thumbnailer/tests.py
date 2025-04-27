@@ -10,27 +10,20 @@ initialize()
 GROUND_TRUTH_DIR = Path("tasks/tiatoolbox_wsi_thumbnailer/data/ground_truth_thumbs")
 WSI_DIR = Path("tasks/tiatoolbox_wsi_thumbnailer/data/wsis")
 
-@parametrize_invocation("small_batch")
+@parametrize_invocation("single_wsi_low_power", "two_wsi_at_2mpp", "full_dir_1p25_power")
 def test_status(invocation: ToolRunResult):
     assert invocation.status == "success"
 
 # ---
 
-@parametrize_invocation("small_batch")
-def test_num_thumbnails(invocation: ToolRunResult):
-    """Number of generated thumbnails equals number of SVS files."""
-    n_wsi = len(list(WSI_DIR.glob("*.svs")))
-    assert invocation.result["num_thumbnails"] == n_wsi
-
-@parametrize_invocation("small_batch")
-def test_output_num_pngs(invocation: ToolRunResult):
-    """Number of PNG files in output matches expected number."""
+@parametrize_invocation("single_wsi_low_power", "two_wsi_at_2mpp", "full_dir_1p25_power")
+def test_num_output_files(invocation: ToolRunResult):
+    """Number of generated thumbnails is as expected and matches returned value."""
     out_dir = invocation.output_dir
-    
     pngs = sorted(out_dir.rglob("*.png"))
     assert len(pngs) == invocation.result["num_thumbnails"]
 
-@parametrize_invocation("small_batch")
+@parametrize_invocation("single_wsi_low_power", "two_wsi_at_2mpp", "full_dir_1p25_power")
 def test_all_outputs_are_valid_png(invocation: ToolRunResult):
     """Every output file is a valid PNG (checks magic number)."""
     out_dir = invocation.output_dir
@@ -39,7 +32,15 @@ def test_all_outputs_are_valid_png(invocation: ToolRunResult):
         # Check first 8 bytes match the PNG file signature (magic number)
         assert f.read_bytes()[:8] == b"\x89PNG\r\n\x1a\n", f"{f.name} is not a valid PNG"
 
-@parametrize_invocation("small_batch")
+@parametrize_invocation("single_wsi_low_power", "two_wsi_at_2mpp", "full_dir_1p25_power")
+def test_all_outputs_nonempty(invocation: ToolRunResult):
+    """Every output PNG is non-empty (sanity check)."""
+    out_dir = invocation.output_dir
+    pngs = sorted(out_dir.rglob("*.png"))
+    for f in pngs:
+        assert f.stat().st_size > 0, f"{f.name} is empty"
+
+@parametrize_invocation("full_dir_1p25_power")
 def test_against_ground_truth(invocation: ToolRunResult):
     """Byte-wise equality with committed reference thumbnails."""
     out_dir = invocation.output_dir

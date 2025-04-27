@@ -1,10 +1,12 @@
-def tiatoolbox_wsi_thumbnailer(input_dir: str = '/mount/input/wsis', output_dir: str = '/mount/output/wsis_thumbs') -> dict:
+def tiatoolbox_wsi_thumbnailer(input_dir: str = '/mount/input/wsis', output_dir: str = '/mount/output/wsis_thumbs', resolution: float = 1.25, units: str = "power") -> dict:
     """
     Generate a PNG thumbnail for every whole-slide image (WSI) in `input_dir` using TIAToolbox and save them to `output_dir` with the suffix “_thumbnail.png”.
     
     Args:
         input_dir: Path to the folder that contains the WSIs
         output_dir: Path to the folder where thumbnails are written
+        resolution: Requested magnification / physical resolution
+        units: Units for resolution ("power", "mpp", "level", "baseline")
     
     Returns:
         dict with the following structure:
