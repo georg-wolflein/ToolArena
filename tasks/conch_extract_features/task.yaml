@@ -30,7 +30,7 @@ test_invocations:
       - name: input_image
         value: /mount/input/MUC/MUC-TCGA-ACCPKIPN.tif
     mount:
-      - source: MUC/MUC-TCGA-ACCPKIPN.tif
+      - source: MUC-TCGA-ACCPKIPN.tif
         target: MUC/MUC-TCGA-ACCPKIPN.tif
   - name: png
     arguments:
