@@ -55,17 +55,3 @@ test_invocations:
         target: TCGA-CRC-Virchow2-features-10x
       - source: crc-wsi
         target: crc-wsi
-  # - name: h5
-  #   arguments:
-  #     - name: output_features
-  #       value: /mount/input/TCGA-BRCA_patch_TCGA-BH-A0DE-01Z-00-DX1.64A0340A-8146-48E8-AAF7-4035988B9152.png
-  #   mount:
-  #     - source: TCGA-BRCA_patch_TCGA-BH-A0DE-01Z-00-DX1.64A0340A-8146-48E8-AAF7-4035988B9152.png
-  #       target: TCGA-BRCA_patch_TCGA-BH-A0DE-01Z-00-DX1.64A0340A-8146-48E8-AAF7-4035988B9152.png
-  # - name: jpg
-  #   arguments:
-  #     - name: input_image
-  #       value: /mount/input/TCGA-BRCA_patch_TCGA-BH-A0DE-01Z-00-DX1.64A0340A-8146-48E8-AAF7-4035988B9152.jpg
-  #   mount:
-  #     - source: TCGA-BRCA_patch_TCGA-BH-A0DE-01Z-00-DX1.64A0340A-8146-48E8-AAF7-4035988B9152.jpg
-  #       target: TCGA-BRCA_patch_TCGA-BH-A0DE-01Z-00-DX1.64A0340A-8146-48E8-AAF7-4035988B9152.jpg
