@@ -207,11 +207,19 @@ class DockerRuntimeClient(HTTPToolClient):
     image: Image  # the docker image
 
     @classmethod
+    @tenacity.retry(
+        stop=tenacity.stop_after_delay(5),
+        wait=tenacity.wait_fixed(1),
+        reraise=True,
+    )
     def _get_host_port(cls, container: Container) -> int:
         container.reload()
-        if not (ports := container.ports):
+        if not container.ports:
             raise RuntimeError("Container is not running")
-        port = ports[DOCKER_CONTAINER_PORT][0]["HostPort"]
+        try:
+            port = container.ports[DOCKER_CONTAINER_PORT][0]["HostPort"]
+        except KeyError as e:
+            raise RuntimeError("Container is not running") from e
         return int(port.split("/")[0])  # may be "1234/tcp"
 
     @classmethod
@@ -227,13 +235,18 @@ class DockerRuntimeClient(HTTPToolClient):
         device_requests = []
         if gpus is None:
             gpus = os.getenv("CUDA_VISIBLE_DEVICES", "").split(",")
+        gpus = [gpu for gpu in gpus if gpu] if gpus else []
         if gpus:
+            logger.debug(f"Using GPUs {gpus}")
             device_requests.append(
                 DeviceRequest(device_ids=gpus, capabilities=[["gpu"]])
             )
-        if "CUDA_VISIBLE_DEVICES" not in env:
-            env |= {"CUDA_VISIBLE_DEVICES": ",".join(map(str, range(len(gpus))))}
-        logger.debug(f"Starting container with GPUs {gpus}")
+            if "CUDA_VISIBLE_DEVICES" not in env:
+                env |= {"CUDA_VISIBLE_DEVICES": ",".join(map(str, range(len(gpus))))}
+        logger.debug("Starting container...")
+        logger.debug(
+            f"CUDA_VISIBLE_DEVICES inside the container: {env.get('CUDA_VISIBLE_DEVICES', 'not set')}"
+        )
 
         # Start a container with the supplied name
         container = get_docker().containers.run(
