@@ -147,7 +147,7 @@ At this point, you should at least define the following parts (the `task.yaml` f
 5. **`returns`**: outputs your tool produces.
 
 > [!IMPORTANT]  
-> If your task requires a GPU, ensure you set `requies: cuda` in the `task.yaml` file.
+> If your task requires a GPU, ensure you set `requires: cuda` in the `task.yaml` file.
 
 ### Define environment variables (optional)
 In the `env` section of `repo`, you may optionally define environment variables that should be set for the tool.
