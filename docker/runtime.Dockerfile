@@ -22,13 +22,10 @@ RUN apt-get update && \
 # Install python
 ARG PYTHON_VERSION=3.12
 RUN apt-get update && \
-    apt-get install -y software-properties-common && \
-    add-apt-repository ppa:deadsnakes/ppa && \
-    apt-get update && \
     apt-get install -y python${PYTHON_VERSION} python3-pip && \
     rm -rf /var/lib/apt/lists/* && \
-    python3 -m pip config set global.break-system-packages true && \
-    ln -s /usr/bin/python3 /usr/bin/python
+    ln -s /usr/bin/python3 /usr/bin/python && \
+    pip config set global.break-system-packages true
 
 # Install uv
 COPY --from=ghcr.io/astral-sh/uv:0.6 /uv /uvx /bin/
