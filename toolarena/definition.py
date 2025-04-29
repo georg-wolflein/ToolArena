@@ -159,6 +159,18 @@ class ToolDefinition(BaseModel):
 {indent}\"\"\"
 """
 
+    @property
+    def xml_summary(self) -> str:
+        return f"""<description>
+{self.description}
+</description>
+<arguments>
+{"\n".join(f"{arg.name} ({arg.type}): {arg.description} (example: {next(a for a in self.example.arguments if a.name == arg.name).value!r})" for arg in self.arguments)}
+</arguments>
+<returns>
+{self.description_of_returns()}
+</returns>"""
+
     def get_invocation(self, name: str) -> ToolInvocation:
         if name == "example":
             return self.example
