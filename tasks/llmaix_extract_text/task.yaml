@@ -11,12 +11,12 @@ repo:
     # HF_TOKEN: "${env:HF_TOKEN}"  # Example environment variable that sets HF_TOKEN to the local environment variable HF_TOKEN.
 papers: [wiest2024llm] # List of papers that this task is based on. Papers are specified by their IDs in the papers.bib file.
 category: information_extraction # Category of the task.
-description: Perform OCR on a document using tesseract. # Description of the task. This should be 1-3 sentences in length, explaining to the LLM what this tool should do.
+description: Preprocess various input files into a standardized structure - a list of the texts. The list can contain multiple texts in case of .csv and .xlsx input files. In some cases, OCR needs to be applied or even enforced to get the correct text from a pdf (or image) document. # Description of the task. This should be 1-3 sentences in length, explaining to the LLM what this tool should do.
 arguments:
   # List of arguments of the task. Each argument is a dictionary with the keys "name", "description", and "type".
   # For example, the following 3 lines define an argument "input_image" with a description "Path to the input image" and a type "str".
   - name: file_path
-    description: Path to the input file
+    description: Path to the input file. Input file can be a .pdf, .csv, .xlsx, .png, .jpg and .docx file.
     type: str  # supported types are "str", "int", "float", "bool", "list", "dict"
   # You may define more arguments as needed...
 returns:
