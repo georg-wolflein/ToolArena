@@ -143,6 +143,7 @@ class ToolRunner(BaseModel):
             image=image,
             mounts=mounts,
             env=self.definition.repo.resolve_env(),
+            cuda=self.definition.requires == "cuda",
         )
 
     def run_without_cache(self, image: Image | None = None) -> ToolResult:
