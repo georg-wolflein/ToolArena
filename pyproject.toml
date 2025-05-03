@@ -8,6 +8,7 @@ description = "Benchmark for LLM tool creation"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "datasets>=3.5.0",
     "docker>=7.1.0",
     "fastapi>=0.115.11",
     "httpx>=0.28.1",
@@ -47,6 +48,7 @@ pythonpath = ["."]
 [dependency-groups]
 dev = [
     "ipykernel>=6.29.5",
+    "pillow>=11.2.1",
     "pytest-asyncio>=0.26.0",
     "types-docker>=7.1.0.20241229",
     "types-pyyaml>=6.0.12.20241230",
