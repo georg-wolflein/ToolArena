@@ -53,6 +53,6 @@ def musk_extract_features(
             out_norm=False,
             ms_aug=True,
             return_global=True,
-        )[0]  # return (vision_cls, text_cls)
+        )[0][0]  # return (vision_cls, text_cls)
 
     return {"features": image_embeddings.tolist()}
