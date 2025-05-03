@@ -108,9 +108,18 @@ def build(
             "implementation.py"
         ).read_text(),
     )
-    print(
-        f"To start an interactive shell, run: [bold]docker run -it --rm --env-file .env {image.image.tags[0]} /bin/bash[/bold]"
+    docker_run_command = " ".join(
+        (
+            "docker run",
+            "-it",
+            "--rm",
+            *(["--env-file .env"] if definition.repo.env else []),
+            *(["--gpus all"] if definition.requires == "cuda" else []),
+            image.image.tags[0],
+            "/bin/bash",
+        )
     )
+    print(f"To start an interactive shell, run: [bold]{docker_run_command}[/bold]")
     return image
 
 

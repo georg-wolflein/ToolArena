@@ -229,20 +229,21 @@ class DockerRuntimeClient(HTTPToolClient):
         name: str,
         port: int | None = None,  # None lets SDK choose port
         mounts: Mounts | None = None,
-        gpus: Sequence[str] | None = None,
+        cuda: bool = False,
         env: Mapping[str, str] = {},
     ) -> Container:
         device_requests = []
-        if gpus is None:
+        if cuda:
             gpus = os.getenv("CUDA_VISIBLE_DEVICES", "").split(",")
-        gpus = [gpu for gpu in gpus if gpu] if gpus else []
-        if gpus:
+            gpus = [gpu for gpu in gpus if gpu]
+            gpus = gpus or ["0"]
             logger.debug(f"Using GPUs {gpus}")
             device_requests.append(
                 DeviceRequest(device_ids=gpus, capabilities=[["gpu"]])
             )
-            if "CUDA_VISIBLE_DEVICES" not in env:
-                env |= {"CUDA_VISIBLE_DEVICES": ",".join(map(str, range(len(gpus))))}
+            env |= {"CUDA_VISIBLE_DEVICES": ",".join(map(str, range(len(gpus))))}
+        else:
+            logger.debug("Not using GPUs")
         logger.debug("Starting container...")
         logger.debug(
             f"CUDA_VISIBLE_DEVICES inside the container: {env.get('CUDA_VISIBLE_DEVICES', 'not set')}"
@@ -274,7 +275,10 @@ class DockerRuntimeClient(HTTPToolClient):
         port: int | None = None,
         timeout: float | None = 10.0,  # max wait time for the runtime to become ready
         mounts: Mounts | None = None,
-        gpus: Sequence[str] | None = None,
+        # Below, cuda works as follows:
+        # - if True: use GPUs specified in CUDA_VISIBLE_DEVICES, or use GPU 0 if CUDA_VISIBLE_DEVICES is not set
+        # - if False: do not use GPUs
+        cuda: bool = False,
         env: Mapping[str, str] = {},
     ) -> Self:
         """Create a new runtime client by building the image and starting the container."""
@@ -295,7 +299,7 @@ class DockerRuntimeClient(HTTPToolClient):
             image=docker_image,
             name=name,
             mounts=mounts,
-            gpus=gpus,
+            cuda=cuda,
             env=env,
             port=port,
         )

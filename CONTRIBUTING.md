@@ -238,6 +238,9 @@ This will create a Docker image using your `install.sh` script to install all de
 If this succeeds without errors, you can start an interactive shell in a container based on this image using:
 ```bash
 docker run -it --rm --env-file .env toolarena-tool:my_nifty_task /bin/bash
+# Or, if your task requires CUDA:
+docker run -it --rm --env-file .env --gpus all toolarena-tool:my_nifty_task /bin/bash
+
 ```
 
 > [!TIP]  

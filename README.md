@@ -152,10 +152,10 @@ If you need to inspect a running container or attach a debugger:
 
 2. **Check logs** directly in Docker:
    ```bash
-   docker run <TASK_NAME> <INVOCATION> --implementation <IMPLEMENTATION_DIR>
+   toolarena run <TASK_NAME> <INVOCATION> --implementation <IMPLEMENTATION_DIR>
    docker logs -f <TASK_NAME>
    ```
-   This streams any output from the tool in real-time. Under the hood, the `toolmaker run` command creates a Docker container with the same name as the task.
+   This streams any output from the tool in real-time. Under the hood, the `toolarena run` command creates a Docker container with the same name as the task.
 
 ---
 

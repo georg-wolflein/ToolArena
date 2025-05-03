@@ -15,8 +15,7 @@ RUN echo ">>>START INSTALL<<<" && \
     set -o allexport && \
     . .env && \
     set +o allexport && \
-    ./install.sh && \
-    rm -f .env
+    ./install.sh
 RUN echo ">>>END INSTALL<<<"
 
 COPY task.yaml implementation.py ./
