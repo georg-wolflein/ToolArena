@@ -206,7 +206,7 @@ def debug(
     print(
         Panel.fit(
             f"""\
-To [green]start[/green] an interactive shell, run: [bold]docker exec -it {client.name} /bin/bash[/bold].
+To [green]start[/green] an interactive shell, run: [bold]docker exec -it --env-file .env {client.name} /bin/bash[/bold].
 To [red]stop[/red] the container, run: [bold]docker stop {client.name}[/bold].
 To [red]remove[/red] the container, run: [bold]docker rm {client.name}[/bold].
 
