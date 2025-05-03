@@ -20,17 +20,12 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Install python
-# Also, if we didn't install the base image with CUDA, set the pip index URL to the CPU version of PyTorch
 ARG PYTHON_VERSION=3.12
 RUN apt-get update && \
     apt-get install -y python${PYTHON_VERSION} python3-pip && \
     rm -rf /var/lib/apt/lists/* && \
     ln -s /usr/bin/python3 /usr/bin/python && \
-    pip config --global set global.break-system-packages true && \
-    if [[ "${BASE}" != *"cuda"* ]]; then \
-        pip config --global set global.index-url https://download.pytorch.org/whl/cpu; \
-        pip config --global set global.extra-index-url https://pypi.org/simple; \
-    fi
+    pip config --global set global.break-system-packages true
 
 # Install uv
 COPY --from=ghcr.io/astral-sh/uv:0.6 /uv /uvx /bin/
