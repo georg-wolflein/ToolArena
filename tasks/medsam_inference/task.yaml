@@ -1,0 +1,66 @@
+name: medsam_inference
+repo:
+  name: MedSAM
+  url: "https://github.com/bowang-lab/MedSAM"
+  commit: b9db486
+papers: [ma2024medsam]
+category: radiology
+requires: cuda
+description: >-
+  Use the trained MedSAM model to segment the given abdomen CT scan.
+arguments:
+  - name: image_file
+    description: Path to the abdomen CT scan image.
+    type: str
+  - name: bounding_box
+    description: Bounding box to segment (list of 4 integers).
+    type: list
+  - name: segmentation_file
+    description: Path to where the segmentation image should be saved.
+    type: str
+returns: []
+example:
+  arguments:
+    - name: image_file
+      value: /mount/input/my_image.jpg
+    - name: bounding_box
+      value: [25, 100, 155, 155]
+    - name: segmentation_file
+      value: /mount/output/segmented_image.png
+  mount:
+    - source: TCGA-BRCA_patch_TCGA-BH-A0DE-01Z-00-DX1.64A0340A-8146-48E8-AAF7-4035988B9152.jpg
+      target: my_image.jpg
+test_invocations:
+  - name: cucumber
+    arguments:
+      - name: image_file
+        value: /mount/input/cucumber.jpg
+      - name: bounding_box
+        value: [25, 100, 155, 155]
+      - name: segmentation_file
+        value: /mount/output/segmented_image.png
+    mount:
+      - source: cucumber.jpg
+        target: cucumber.jpg
+  - name: other_output_file
+    arguments:
+      - name: image_file
+        value: /mount/input/cucumber.jpg
+      - name: bounding_box
+        value: [25, 100, 155, 155]
+      - name: segmentation_file
+        value: /mount/output/some_other_file.png
+    mount:
+      - source: cucumber.jpg
+        target: cucumber.jpg
+  - name: png
+    arguments:
+      - name: image_file
+        value: /mount/input/image2.png
+      - name: bounding_box
+        value: [25, 100, 155, 155]
+      - name: segmentation_file
+        value: /mount/output/segmented_image.png
+    mount:
+      - source: TCGA-BRCA_patch_TCGA-BH-A0DE-01Z-00-DX1.64A0340A-8146-48E8-AAF7-4035988B9152.png
+        target: image2.png
