@@ -1,0 +1,34 @@
+name: modernbert_predict_masked
+repo: 
+  name: ModernBERT
+  url: "https://github.com/AnswerDotAI/ModernBERT"
+  commit: 8c57a0f
+papers: [warner2024modernbert]
+category: llms
+requires: cpu
+description: Given a masked sentence string, predict the original sentence using the pretrained ModernBERT-base model on CPU.
+arguments:
+  - name: input_string
+    description: The masked sentence string. The masked part is represented by "[MASK]"".
+    type: str
+returns:
+  - name: prediction
+    description: The predicted original sentence (including the predicted masked part)
+    type: str
+example:
+  arguments:
+    - name: input_string
+      value: "Paris is the [MASK] of France."
+test_invocations:
+  - name: walking
+    arguments:
+      - name: input_string
+        value: "He walked to the [MASK]."
+  - name: future_of_ai
+    arguments:
+      - name: input_string
+        value: "The future of AI is [MASK]."
+  - name: meaning_of_life
+    arguments:
+      - name: input_string
+        value: "The meaning of life is [MASK]."
