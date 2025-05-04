@@ -1,0 +1,49 @@
+name: retfound_feature_vector
+repo: 
+  name: RETFound
+  url: "https://github.com/rmaphoh/RETFound_MAE"
+  commit: 897d71c
+  env:
+    HF_TOKEN: "${env:HF_TOKEN}"  # required for downloading models
+papers: [zhou2023retfound]
+category: imaging
+requires: cuda
+description: >-
+  Extract the latent feature vector for the given retinal image using the RETFound pretrained RETFound_mae_natureCFP model.
+arguments:
+  - name: image_file
+    description: Path to the retinal image.
+    type: str
+returns:
+  - name: feature_vector
+    description: The feature vector for the given retinal image, as a list of floats.
+    type: list
+example:
+  arguments:
+    - name: image_file
+      value: /mount/input/retinal_image.jpg
+  mount:
+    - source: cucumber.jpg
+      target: retinal_image.jpg
+test_invocations:
+  - name: jpg
+    arguments:
+      - name: image_file
+        value: /mount/input/image1.jpg
+    mount:
+      - source: "TCGA-BRCA_patch_TCGA-BH-A0DE-01Z-00-DX1.64A0340A-8146-48E8-AAF7-4035988B9152.jpg"
+        target: image1.jpg
+  - name: png
+    arguments:
+      - name: image_file
+        value: /mount/input/image2.png
+    mount:
+      - source: "TCGA-BRCA_patch_TCGA-BH-A0DE-01Z-00-DX1.64A0340A-8146-48E8-AAF7-4035988B9152.png"
+        target: image2.png
+  - name: cucumber_different_filename
+    arguments:
+      - name: image_file
+        value: /mount/input/cucumber.jpg
+    mount:
+      - source: "cucumber.jpg"
+        target: cucumber.jpg
