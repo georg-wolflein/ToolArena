@@ -2,6 +2,7 @@ name: pathfinder_verify_biomarker
 repo:
   name: PathFinder
   url: "https://github.com/LiangJunhao-THU/PathFinderCRC"
+  commit: 093d77b
 papers: [liang2023pathfinder]
 category: pathology
 description: Given WSI probability maps, a hypothesis of a potential biomarker, and clinical data, determine (1) whether the potential biomarker is significant for patient prognosis, and (2) whether the potential biomarker is independent among already known biomarkers.
