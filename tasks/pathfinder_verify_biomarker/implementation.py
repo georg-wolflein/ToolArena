@@ -26,3 +26,41 @@ def pathfinder_verify_biomarker(
           'hazard_ratio': float  # The hazard ratio for the biomarker
         }
     """
+
+    import sys
+
+    sys.path.append("/workspace/PathFinder/code")
+
+    import importlib
+
+    import pandas as pd
+    from generate_combined_data import calculate_tissue_fractions
+    from survival_analysis import perform_cox_analysis
+
+    clini_df = pd.read_csv(clini_table)
+    files_df = pd.read_csv(files_table)
+
+    # Dynamically import the hypothesis score function
+    spec = importlib.util.spec_from_file_location("hypothesis_score", hypothesis)
+    hypothesis_score = importlib.util.module_from_spec(spec)
+    sys.modules["hypothesis_score"] = hypothesis_score
+    spec.loader.exec_module(hypothesis_score)
+
+    combined_df = calculate_tissue_fractions(
+        heatmaps,
+        clini_df,
+        files_df,
+        "preprocessed_clini.csv",
+        {"my_biomarker": hypothesis_score.hypothesis_score},
+    )
+    cph, df = perform_cox_analysis(
+        combined_df,
+        duration_col=survival_time_column,
+        event_col=event_column,
+        score_cols=("my_biomarker",),
+        binary_cols=known_biomarkers,
+    )
+    return {
+        "p_value": cph.summary["p"]["my_biomarker_binary"],
+        "hazard_ratio": cph.hazard_ratios_["my_biomarker_binary"],
+    }
