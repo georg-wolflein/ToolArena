@@ -1,0 +1,49 @@
+name: uni_extract_features
+repo:
+  name: UNI
+  url: "https://github.com/mahmoodlab/UNI"
+  commit: 42715ef
+  env:
+    HF_TOKEN: "${env:HF_TOKEN}"  # required for downloading models
+papers: [chen2024uni]
+category: pathology
+requires: cuda
+description: Perform feature extraction on an input image using the "UNI" model.
+arguments:
+  - name: input_image
+    description: Path to the input image
+    type: str
+returns:
+  - name: features
+    description: The feature vector extracted from the input image, as a list of floats
+    type: list
+example:
+  arguments:
+    - name: input_image
+      value: /mount/input/TUM/TUM-TCGA-ACRLPPQE.tif
+  mount:
+    - source: TUM-TCGA-ACRLPPQE.tif
+      target: TUM/TUM-TCGA-ACRLPPQE.tif
+test_invocations:
+  - name: kather100k_muc
+    arguments:
+      - name: input_image
+        value: /mount/input/MUC/MUC-TCGA-ACCPKIPN.tif
+    mount:
+      - source: MUC-TCGA-ACCPKIPN.tif
+        target: MUC/MUC-TCGA-ACCPKIPN.tif
+  - name: tcga_brca_patch_png
+    arguments:
+      - name: input_image
+        value: /mount/input/TCGA-BRCA_patch_TCGA-BH-A0DE-01Z-00-DX1.64A0340A-8146-48E8-AAF7-4035988B9152.png
+    mount:
+      - source: TCGA-BRCA_patch_TCGA-BH-A0DE-01Z-00-DX1.64A0340A-8146-48E8-AAF7-4035988B9152.png
+        target: TCGA-BRCA_patch_TCGA-BH-A0DE-01Z-00-DX1.64A0340A-8146-48E8-AAF7-4035988B9152.png
+  - name: tcga_brca_patch_jpg
+    arguments:
+      - name: input_image
+        value: /mount/input/TCGA-BRCA_patch_TCGA-BH-A0DE-01Z-00-DX1.64A0340A-8146-48E8-AAF7-4035988B9152.jpg
+    mount:
+      - source: TCGA-BRCA_patch_TCGA-BH-A0DE-01Z-00-DX1.64A0340A-8146-48E8-AAF7-4035988B9152.jpg
+        target: TCGA-BRCA_patch_TCGA-BH-A0DE-01Z-00-DX1.64A0340A-8146-48E8-AAF7-4035988B9152.jpg
+
