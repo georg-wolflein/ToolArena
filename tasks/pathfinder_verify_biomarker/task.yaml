@@ -1,0 +1,140 @@
+name: pathfinder_verify_biomarker
+repo:
+  name: PathFinder
+  url: "https://github.com/LiangJunhao-THU/PathFinderCRC"
+  commit: 1d81ebd
+papers: [liang2023pathfinder]
+category: pathology
+description: Given WSI probability maps, a hypothesis of a potential biomarker, and clinical data, determine (1) whether the potential biomarker is significant for patient prognosis, and (2) whether the potential biomarker is independent among already known biomarkers.
+arguments:
+  - name: heatmaps
+    description: Path to the folder containing the numpy array (`*.npy`) files, which contains the heatmaps of the trained model (each heatmap is HxWxC where C is the number of classes)
+    type: str
+  - name: hypothesis
+    description: >-
+      A python file, which contains a function `def hypothesis_score(prob_map_path: str) -> float` which expresses a mathematical model of a hypothesis of a potential biomarker. 
+      For a particular patient (whose heatmap is given by `prob_map_path` as a npy file), the function returns a risk score.
+    type: str
+  - name: clini_table
+    description: Path to the CSV file containing the clinical data
+    type: str
+  - name: files_table
+    description: Path to the CSV file containing the mapping between patient IDs (in the PATIENT column) and heatmap filenames (in the FILENAME column)
+    type: str
+  - name: survival_time_column
+    description: The name of the column in the clinical data that contains the survival time
+    type: str
+  - name: event_column
+    description: The name of the column in the clinical data that contains the event (e.g. death, recurrence, etc.)
+    type: str
+  - name: known_biomarkers
+    description: A list of known biomarkers. These are column names in the clinical data.
+    type: list
+returns:
+  - name: p_value
+    description: The p-value of the significance of the potential biomarker
+    type: float
+  - name: hazard_ratio
+    description: The hazard ratio for the biomarker
+    type: float
+example:
+  arguments:
+    - name: heatmaps
+      value: /mount/input/TCGA_CRC
+    - name: hypothesis
+      value: /mount/input/mus_fraction_score.py
+    - name: clini_table
+      value: /mount/input/TCGA_CRC_info.csv
+    - name: files_table
+      value: /mount/input/TCGA_CRC_files.csv
+    - name: survival_time_column
+      value: OS.time
+    - name: event_column
+      value: vital_status
+    - name: known_biomarkers
+      value: [MSI]
+  mount:
+    - source: "TCGA_CRC"
+      target: "TCGA_CRC"
+    - source: "mus_fraction_score.py"
+      target: "mus_fraction_score.py"
+    - source: "TCGA_CRC_info.csv"
+      target: "TCGA_CRC_info.csv"
+    - source: "TCGA_CRC_files.csv"
+      target: "TCGA_CRC_files.csv"
+test_invocations:
+  - name: crc_tum_fraction_score
+    arguments:
+      - name: heatmaps
+        value: /mount/input/TCGA_CRC
+      - name: hypothesis
+        value: /mount/input/tum_fraction_score.py
+      - name: clini_table
+        value: /mount/input/TCGA_CRC_info.csv
+      - name: files_table
+        value: /mount/input/TCGA_CRC_files.csv
+      - name: survival_time_column
+        value: OS.time
+      - name: event_column
+        value: OS
+      - name: known_biomarkers
+        value: [MSI]
+    mount:
+      - source: "TCGA_CRC"
+        target: "TCGA_CRC"
+      - source: "tum_fraction_score.py"
+        target: "tum_fraction_score.py"
+      - source: "TCGA_CRC_info.csv"
+        target: "TCGA_CRC_info.csv"
+      - source: "TCGA_CRC_files.csv"
+        target: "TCGA_CRC_files.csv"
+  - name: crc_str_fraction_score
+    arguments:
+      - name: heatmaps
+        value: /mount/input/TCGA_CRC
+      - name: hypothesis
+        value: /mount/input/str_fraction_score.py
+      - name: clini_table
+        value: /mount/input/TCGA_CRC_info.csv
+      - name: files_table
+        value: /mount/input/TCGA_CRC_files.csv
+      - name: survival_time_column
+        value: OS.time
+      - name: event_column
+        value: OS
+      - name: known_biomarkers
+        value: [MSI]
+    mount:
+      - source: "TCGA_CRC"
+        target: "TCGA_CRC"
+      - source: "str_fraction_score.py"
+        target: "str_fraction_score.py"
+      - source: "TCGA_CRC_info.csv"
+        target: "TCGA_CRC_info.csv"
+      - source: "TCGA_CRC_files.csv"
+        target: "TCGA_CRC_files.csv"
+  - name: cptac_str_fraction_score
+    arguments:
+      - name: heatmaps
+        value: /mount/input/CPTAC_CRC
+      - name: hypothesis
+        value: /mount/input/str_fraction_score.py
+      - name: clini_table
+        value: /mount/input/CPTAC_CRC_info.csv
+      - name: files_table
+        value: /mount/input/CPTAC_CRC_files.csv
+      - name: survival_time_column
+        value: OS.time
+      - name: event_column
+        value: OS
+      - name: known_biomarkers
+        value: [MSI]
+    mount:
+      - source: "CPTAC_CRC"
+        target: "CPTAC_CRC"
+      - source: "str_fraction_score.py"
+        target: "str_fraction_score.py"
+      - source: "CPTAC_CRC_info.csv"
+        target: "CPTAC_CRC_info.csv"
+      - source: "CPTAC_CRC_files.csv"
+        target: "CPTAC_CRC_files.csv"
