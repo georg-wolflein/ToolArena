@@ -1,0 +1,107 @@
+name: stamp_train_classification_model
+repo:
+  name: STAMP
+  url: "https://github.com/KatherLab/STAMP"
+  commit: 97522aa
+papers: [elnahhas2024stamp]
+category: pathology
+requires: cuda
+description: Train a model for biomarker classification. You will be supplied with the path to the folder containing the whole slide images, alongside a path to a CSV file containing the training labels. Use ctranspath for feature extraction.
+arguments:
+  - name: slide_dir
+    description: Path to the folder containing the whole slide images
+    type: str
+  - name: clini_table
+    description: Path to the CSV file containing the clinical data
+    type: str
+  - name: slide_table
+    description: Path to the CSV file containing the slide metadata
+    type: str
+  - name: target_column
+    description: The name of the column in the clinical data that contains the target labels
+    type: str
+  - name: trained_model_path
+    description: Path to the *.ckpt file where the trained model should be saved by this function
+    type: str
+returns:
+  - name: num_params
+    description: The number of parameters in the trained model
+    type: int
+example:
+  arguments:
+    - name: slide_dir
+      value: /mount/input/TCGA-BRCA-SLIDES
+    - name: clini_table
+      value: /mount/input/TCGA-BRCA-DX_CLINI.xlsx
+    - name: slide_table
+      value: /mount/input/TCGA-BRCA-DX_SLIDE.csv
+    - name: target_column
+      value: TP53_driver
+    - name: trained_model_path
+      value: /mount/output/STAMP-BRCA-TP53-model.ckpt
+  mount:
+    - source: brca
+      target: TCGA-BRCA-SLIDES
+    - source: TCGA-BRCA-DX_CLINI.xlsx
+      target: TCGA-BRCA-DX_CLINI.xlsx
+    - source: TCGA-BRCA-DX_SLIDE.csv
+      target: TCGA-BRCA-DX_SLIDE.csv
+test_invocations:
+  - name: crc_msi
+    arguments:
+      - name: slide_dir
+        value: /mount/input/TCGA-CRC-SLIDES
+      - name: clini_table
+        value: /mount/input/TCGA-CRC-DX_CLINI.xlsx
+      - name: slide_table
+        value: /mount/input/TCGA-CRC-DX_SLIDE.csv
+      - name: target_column
+        value: isMSIH
+      - name: trained_model_path
+        value: /mount/output/STAMP-CRC-MSI-model.ckpt
+    mount:
+      - source: crc
+        target: TCGA-CRC-SLIDES
+      - source: TCGA-CRC-DX_CLINI.xlsx
+        target: TCGA-CRC-DX_CLINI.xlsx
+      - source: TCGA-CRC-DX_SLIDE.csv
+        target: TCGA-CRC-DX_SLIDE.csv
+  - name: crc_braf
+    arguments:
+      - name: slide_dir
+        value: /mount/input/TCGA-CRC-SLIDES
+      - name: clini_table
+        value: /mount/input/TCGA-CRC-DX_CLINI.xlsx
+      - name: slide_table
+        value: /mount/input/TCGA-CRC-DX_SLIDE.csv
+      - name: target_column
+        value: BRAF
+      - name: trained_model_path
+        value: /mount/output/STAMP-CRC-BRAF-model.ckpt
+    mount:
+      - source: crc
+        target: TCGA-CRC-SLIDES
+      - source: TCGA-CRC-DX_CLINI.xlsx
+        target: TCGA-CRC-DX_CLINI.xlsx
+      - source: TCGA-CRC-DX_SLIDE.csv
+        target: TCGA-CRC-DX_SLIDE.csv
+  - name: crc_kras
+    arguments:
+      - name: slide_dir
+        value: /mount/input/TCGA-CRC-SLIDES
+      - name: clini_table
+        value: /mount/input/TCGA-CRC-DX_CLINI.xlsx
+      - name: slide_table
+        value: /mount/input/TCGA-CRC-DX_SLIDE.csv
+      - name: target_column
+        value: KRAS
+      - name: trained_model_path
+        value: /mount/output/STAMP-CRC-KRAS-model.ckpt
+    mount:
+      - source: crc
+        target: TCGA-CRC-SLIDES
+      - source: TCGA-CRC-DX_CLINI.xlsx
+        target: TCGA-CRC-DX_CLINI.xlsx
+      - source: TCGA-CRC-DX_SLIDE.csv
+        target: TCGA-CRC-DX_SLIDE.csv
+note: Here, the agent must realize that it needs to perform feature extraction before training the model.
