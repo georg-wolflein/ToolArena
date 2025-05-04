@@ -1,0 +1,93 @@
+name: tabpfn_predict
+repo:
+  name: TabPFN
+  url: "https://github.com/PriorLabs/TabPFN"
+  commit: e8744e4
+papers: [hollmann2025tabpfn]
+category: tabular
+requires: cpu
+description: Train a predictor using TabPFN on a tabular dataset. Evaluate the predictor on the test set. Train on CPU.
+arguments:
+  - name: train_csv
+    description: Path to the CSV file containing the training data
+    type: str
+  - name: test_csv
+    description: Path to the CSV file containing the test data
+    type: str
+  - name: feature_columns
+    description: The names of the columns to use as features
+    type: list
+  - name: target_column
+    description: The name of the column to predict
+    type: str
+returns:
+  - name: roc_auc
+    description: The ROC AUC score of the predictor on the test set
+    type: float
+  - name: accuracy
+    description: The accuracy of the predictor on the test set
+    type: float
+  - name: probs
+    description: The probabilities of the predictor on the test set, as a list of floats (one per sample in the test set)
+    type: list
+example:
+  arguments:
+    - name: train_csv
+      value: /mount/input/breast_cancer_train.csv
+    - name: test_csv
+      value: /mount/input/breast_cancer_test.csv
+    - name: feature_columns
+      value: ["mean radius", "mean texture", "mean perimeter", "mean area", "mean smoothness", "mean compactness", "mean concavity", "mean concave points", "mean symmetry", "mean fractal dimension", "radius error", "texture error", "perimeter error", "area error", "smoothness error", "compactness error", "concavity error", "concave points error", "symmetry error", "fractal dimension error", "worst radius", "worst texture", "worst perimeter", "worst area", "worst smoothness", "worst compactness", "worst concavity", "worst concave points", "worst symmetry", "worst fractal dimension"]
+    - name: target_column
+      value: target
+  mount:
+    - source: breast_cancer_train.csv
+      target: breast_cancer_train.csv
+    - source: breast_cancer_test.csv
+      target: breast_cancer_test.csv
+test_invocations:
+  - name: diabetes
+    arguments:
+      - name: train_csv
+        value: /mount/input/diabetes_train.csv
+      - name: test_csv
+        value: /mount/input/diabetes_test.csv
+      - name: feature_columns
+        value: ["preg", "plas", "pres", "skin", "insu", "mass", "pedi", "age"]
+      - name: target_column
+        value: class
+    mount:
+      - source: diabetes_train.csv
+        target: diabetes_train.csv
+      - source: diabetes_test.csv
+        target: diabetes_test.csv
+  - name: heart_disease
+    arguments:
+      - name: train_csv
+        value: /mount/input/heart_disease_train.csv
+      - name: test_csv
+        value: /mount/input/heart_disease_test.csv
+      - name: feature_columns
+        value: ["age", "sex", "chest", "resting_blood_pressure", "serum_cholestoral", "fasting_blood_sugar", "resting_electrocardiographic_results", "maximum_heart_rate_achieved", "exercise_induced_angina", "oldpeak", "slope", "number_of_major_vessels", "thal"]
+      - name: target_column
+        value: class
+    mount:
+      - source: heart_disease_train.csv
+        target: heart_disease_train.csv
+      - source: heart_disease_test.csv
+        target: heart_disease_test.csv
+  - name: parkinsons
+    arguments:
+      - name: train_csv
+        value: /mount/input/parkinsons_train.csv
+      - name: test_csv
+        value: /mount/input/parkinsons_test.csv
+      - name: feature_columns
+        value: ["V1", "V2", "V3", "V4", "V5", "V6", "V7", "V8", "V9", "V10", "V11", "V12", "V13", "V14", "V15", "V16", "V17", "V18", "V19", "V20", "V21", "V22"]
+      - name: target_column
+        value: Class
+    mount:
+      - source: parkinsons_train.csv
+        target: parkinsons_train.csv
+      - source: parkinsons_test.csv
+        target: parkinsons_test.csv
