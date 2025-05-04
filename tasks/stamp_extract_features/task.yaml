@@ -2,7 +2,7 @@ name: stamp_extract_features
 repo:
   name: STAMP
   url: "https://github.com/KatherLab/STAMP"
-  commit: 0042e6f
+  commit: 97522aa
 papers: [elnahhas2024stamp]
 category: pathology
 requires: cuda
