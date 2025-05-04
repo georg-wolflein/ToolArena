@@ -1,0 +1,54 @@
+name: nnunet_preprocess
+repo:
+  name: nnUNet
+  url: "https://github.com/MIC-DKFZ/nnUNet"
+  commit: 58a3b12
+papers: [isensee2020nnunet]
+category: radiology
+description: >-
+  Preprocess a dataset using nnUNetv2. The dataset is in the old Medical Segmentation Decathlon (MSD) format and will need to be converted. Does not require GPU.
+requires: cpu
+arguments:
+  - name: dataset_path
+    description: The path to the dataset folder to train the model on (in MSD format, so contains dataset.json, imagesTr, imagesTs, labelsTr)
+    type: str
+returns:
+  - name: dataset_json
+    description: The dataset config object (dataset.json) created by nnUNetv2, as the parsed json object
+    type: dict
+  - name: nnUNetPlans_json
+    description: The nnUNetv2 plan file (nnUNetPlans.json) created by nnUNetv2, as the parsed json object
+    type: dict
+example:
+  arguments:
+    - name: dataset_path
+      value: /mount/input/Task02_Heart
+  mount:
+    - source: msd/Task02_Heart
+      target: Task02_Heart
+test_invocations:
+  - name: prostate
+    arguments:
+      - name: dataset_path
+        value: /mount/input/Task05_Prostate
+    mount:
+      - source: msd/Task05_Prostate
+        target: Task05_Prostate
+  - name: spleen
+    arguments:
+      - name: dataset_path
+        value: /mount/input/Task09_Spleen
+    mount:
+      - source: msd/Task09_Spleen
+        target: Task09_Spleen
+  - name: hippocampus
+    arguments:
+      - name: dataset_path
+        value: /mount/input/Task04_Hippocampus
+    mount:
+      - source: msd/Task04_Hippocampus
+        target: Task04_Hippocampus
+note: >-
+  Use the UNet model from DKFZ to train a medical segmentation model. More info here:
+  https://github.com/MIC-DKFZ/nnUNet/blob/master/documentation/how_to_use_nnunet.md
+  https://github.com/MIC-DKFZ/nnUNet/blob/master/documentation/dataset_format.md
