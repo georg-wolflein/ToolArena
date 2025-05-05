@@ -55,6 +55,7 @@ dev = [
 ]
 benchmark = [
     "h5py>=3.13.0",
+    "nibabel>=5.3.2",
 ]
 
 [tool.ruff.lint.per-file-ignores]
