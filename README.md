@@ -84,6 +84,15 @@ All tasks live under the [`tasks/`](tasks/) directory. Each contains:
   - A **Python implementation** (`implementation.py`) that provides a reference function for the given task.
 
 
+## Downloading external data
+Some tasks require large external data files as input (e.g. images, datasets, etc.).
+Each task may specify a `data/download.sh` script, which downloads all required external data from publicly available repositories.
+While may execute these download scripts yourself, ToolArena provides a convenient command to download all data for you:
+```bash
+toolarena download
+```
+If you want to download the data for one specific task, simply run `toolarena download <TASK_NAME>` instead.
+
 ## Running a candidate implementation
 A candidate implementation must have:
 1. **`install.sh`**  

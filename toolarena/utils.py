@@ -5,9 +5,11 @@ import re
 import shutil
 from collections.abc import AsyncGenerator, Container, Mapping
 from pathlib import Path
-from typing import TypeAlias
+from typing import Iterator, TypeAlias
 
+from docker.models.containers import Container as DockerContainer
 from loguru import logger
+from rich import print as rich_print
 
 ROOT_DIR = Path(__file__).parent.parent
 RUNS_DIR = ROOT_DIR / "runs"
@@ -111,3 +113,30 @@ async def stream_reader_to_str_stream(
     final = decoder.decode(b"", final=True)
     if final:
         yield final
+
+
+def run_and_stream_container(container: DockerContainer) -> Iterator[str]:
+    """Stream the logs of a container to the console.
+
+    You must start the container with the following options:
+        stdout=True,
+        stderr=True,
+        detach=True,
+        tty=False,
+    """
+    try:
+        # Stream the logs to the console
+        decoder = codecs.getincrementaldecoder("utf-8")()
+        for chunk in container.logs(stream=True, follow=True):
+            yield decoder.decode(chunk)
+        if final := decoder.decode(b"", final=True):
+            yield final
+    except KeyboardInterrupt:
+        rich_print(
+            f"[red]Stopping[/red] container [bold]{container.name}[/bold] due to KeyboardInterrupt"
+        )
+        try:
+            container.stop(timeout=0)
+        except Exception:
+            pass
+        raise
