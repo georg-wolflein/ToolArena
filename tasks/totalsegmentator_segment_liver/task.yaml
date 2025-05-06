@@ -1,4 +1,4 @@
-name: totalsegmentator
+name: totalsegmentator_segment_liver
 repo:
   name: TotalSegmentator
   url: "https://github.com/wasserth/TotalSegmentator"
@@ -9,7 +9,7 @@ requires: cuda
 description: Segment the liver vessels from the input CT scan(s) and save the result as a .nii.gz file. In the output segmentation, liver vessel voxels must have the value 1, and all other voxels must be 0.
 arguments:
   - name: ct_input_path
-    description: Path to the input image
+    description: Path to the input image in .nii.gz format
     type: str
   - name: segmentation_mask_output_path
     description: Path to the output file (liver vessels segmentation mask) in .nii.gz format
