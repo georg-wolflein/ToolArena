@@ -6,13 +6,10 @@ repo:
 papers: [pocock2022tiatoolbox]
 category: pathology
 requires: cpu
-description: Generate JSON overview of pixel dimensions for every whole slide image (WSI) in `input_dir` using TIAToolbox and save them to `output_dir` with the suffix "_dims.json".
+description: Determine the pixel dimensions for every whole slide image (WSI) in `input_dir` using TIAToolbox.
 arguments:
   - name: input_dir
     description: Path to the folder that contains the WSIs
-    type: str 
-  - name: output_dir
-    description: Path to the folder where thumbnails are written
     type: str
   - name: include_pyramid
     type: bool
@@ -20,14 +17,17 @@ arguments:
     description: Whether to include every pyramid level instead of only the baseline dimensions
 returns:
   - name: dimensions
-    description: Dimensions of the WSI (optionally with of without full pyramid values)
+    description: >-
+      Dimensions of the WSI (optionally with of without full pyramid values) as a dict of 
+      {slide_filename: {"baseline": [width, height], "levels": [[width, height], ...]}}, where 
+      `baseline` is the dimensions of the WSI at the highest resolution and `levels` is a list of 
+      dimensions for each pyramid level. If `include_pyramid` is `False`, only the `baseline` 
+      dimensions are included.
     type: dict
 example:
   arguments:
     - name: input_dir
       value: /mount/input/wsis
-    - name: output_dir
-      value: /mount/output/wsis_dims
     - name: include_pyramid
       value: True
   mount:
@@ -38,8 +38,6 @@ test_invocations:
     arguments:
     - name: input_dir
       value: /mount/input/wsis
-    - name: output_dir
-      value: /mount/output/wsis_dims
     - name: include_pyramid
       value: False
     mount:
@@ -49,8 +47,6 @@ test_invocations:
     arguments:
     - name: input_dir
       value: /mount/input/wsis
-    - name: output_dir
-      value: /mount/output/wsis_dims
     - name: include_pyramid
       value: True
     mount:
@@ -60,8 +56,6 @@ test_invocations:
     arguments:
     - name: input_dir
       value: /mount/input/wsis
-    - name: output_dir
-      value: /mount/output/wsis_dims
     - name: include_pyramid
       value: True
     mount:
@@ -73,8 +67,6 @@ test_invocations:
     arguments:
     - name: input_dir
       value: /mount/input/wsis
-    - name: output_dir
-      value: /mount/output/wsis_dims
     - name: include_pyramid
       value: False
     mount:
