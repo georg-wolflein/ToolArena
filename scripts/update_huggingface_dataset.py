@@ -11,9 +11,12 @@ HF_COMMIT_MESSAGE = os.getenv("HF_COMMIT_MESSAGE", "Update dataset")
 
 if __name__ == "__main__":
     ds = Dataset.from_list(
-        [
-            ToolDefinition.from_yaml(f).model_dump(mode="json")
-            for f in TASKS_DIR.glob("*/task.yaml")
-        ]
+        sorted(
+            (
+                ToolDefinition.from_yaml(f).model_dump(mode="json")
+                for f in TASKS_DIR.glob("*/task.yaml")
+            ),
+            key=lambda definition: definition["name"],
+        )
     )
     ds.push_to_hub(HF_REPO_ID, commit_message=HF_COMMIT_MESSAGE)
