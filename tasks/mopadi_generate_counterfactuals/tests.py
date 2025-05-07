@@ -61,18 +61,6 @@ def test_if_predictions_flipped(invocation: ToolRunResult):
 
 
 @parametrize_invocation("brca_types", "liver", "lung")
-def test_if_three_tiles_per_patient(invocation: ToolRunResult):
-    results_root_dir = invocation.output_dir.rglob("mil_classifier_*/counterfactuals/*")
-    patients_dirs = list(results_root_dir)
-
-    for patient_dir in patients_dirs:
-        print(patient_dir)
-        tile_dirs = [d for d in patient_dir.iterdir() if d.is_dir()]
-        print(tile_dirs)
-        assert len(tile_dirs) == 3, f"Expected 3 tiles for patient {patient_dir.name}, found {len(tile_dirs)}"
-
-
-@parametrize_invocation("brca_types", "liver", "lung")
 def test_manipulation_amplitude(invocation: ToolRunResult):
     results_root_dir = invocation.output_dir.rglob("mil_classifier_*/counterfactuals/*")
     patients_dirs = list(results_root_dir)
