@@ -1,0 +1,141 @@
+name: mopadi_generate_counterfactuals
+repo:
+  name: mopadi
+  url: "https://github.com/KatherLab/mopadi"
+  commit: 4e76820
+  env:
+    HF_TOKEN: "${env:HF_TOKEN}"
+papers: [zigutyte2024mopadi]
+category: pathology
+requires: cuda
+description: Generate counterfactual explanations for the top 3 tiles per patient by manipulating them with a specific amplitude, such that the predicted class of each counterfactual image flips to the opposite class (i.e., the predicted output for the opposite class exceeds 0.9), while avoiding excessive overmanipulation. Use a pretrained diffusion autoencoder according to the cancer type, combined with a corresponding MIL classifier trained to distinguish biologically meaningful histological patterns. You will be provided with the path to the folder containing images, the clinical table with each patient’s target label values, and the folder containing pre-extracted features
+arguments:
+  - name: images_dir
+    description: Path to the folder containing patient subfolders with image patches
+    type: str
+  - name: feat_path_test
+    description: Path to the folder containing extracted features for each patient
+    type: str
+  - name: clini_table
+    description: Path to the XLSX file containing the MSI status of each patient
+    type: str
+  - name: target_label
+    description: Name of the column in the clinical table that contains classification labels
+    type: str
+  - name: base_dir
+    description: Path to the output directory where the results will be saved
+    type: str
+  - name: manipulation_levels
+    description: Amplitude of the manipulation to be applied to the images
+    type: list 
+  - name: pretrained_autoenc_name
+    description: Name of the pretrained diffusion autoencoder model
+    type: str
+  - name: pretrained_clf_name
+    description: Name of the pretrained classifier
+    type: str
+returns:
+  - name: num_counterfactuals
+    description: The number of counterfactual images that were generated
+    type: int
+example:
+  arguments:
+    - name: images_dir
+      value: /mount/input/images/TCGA-CRC
+    - name: feat_path_test
+      value: /mount/input/features/TCGA-CRC
+    - name: clini_table
+      value: /mount/input/TCGA-CRC-DX_CLINI.xlsx
+    - name: target_label
+      value: isMSIH
+    - name: base_dir
+      value: /mount/output/counterfactuals_crc_msi
+    - name: manipulation_levels
+      value: [0.06]
+    - name: pretrained_autoenc_name 
+      value: crc_512_model
+    - name: pretrained_clf_name 
+      value: msi
+  mount:
+    - source: images/TCGA-CRC
+      target: images/TCGA-CRC
+    - source: features/TCGA-CRC
+      target: features/TCGA-CRC
+    - source: TCGA-CRC-DX_CLINI.xlsx
+      target: TCGA-CRC-DX_CLINI.xlsx
+test_invocations:
+  - name: brca_types
+    arguments:
+      - name: images_dir
+        value: /mount/input/images/TCGA-BRCA
+      - name: feat_path_test
+        value: /mount/input/features/TCGA-BRCA
+      - name: clini_table
+        value: /mount/input/TCGA-BRCA-DX_CLINI.csv
+      - name: target_label
+        value: BRCA_Pathology
+      - name: base_dir
+        value: /mount/output/counterfactuals_brca_types
+      - name: manipulation_levels
+        value: [0.06]
+      - name: pretrained_autoenc_name
+        value: brca_512_model
+      - name: pretrained_clf_name 
+        value: type
+    mount:
+      - source: images/TCGA-BRCA
+        target: images/TCGA-BRCA
+      - source: features/TCGA-BRCA
+        target: features/TCGA-BRCA
+      - source: TCGA-BRCA-DX_CLINI.csv
+        target: TCGA-BRCA-DX_CLINI.csv
+  - name: liver
+    arguments:
+      - name: images_dir
+        value: /mount/input/images/Pancancer-liver
+      - name: feat_path_test
+        value: /mount/input/features/Pancancer
+      - name: clini_table
+        value: /mount/input/Pancancer_clini.xlsx
+      - name: target_label
+        value: Type
+      - name: base_dir
+        value: /mount/output/counterfactuals_liver_types
+      - name: manipulation_levels
+        value: [0.04]
+      - name: pretrained_autoenc_name
+        value: pancancer_model
+      - name: pretrained_clf_name 
+        value: liver
+    mount:
+      - source: images/Pancancer-liver
+        target: images/Pancancer-liver
+      - source: features/Pancancer
+        target: features/Pancancer
+      - source: Pancancer_clini.xlsx
+        target: Pancancer_clini.xlsx
+  - name: lung
+    arguments:
+      - name: images_dir
+        value: /mount/input/images/Pancancer-lung
+      - name: feat_path_test
+        value: /mount/input/features/Pancancer
+      - name: clini_table
+        value: /mount/input/Pancancer_clini.xlsx
+      - name: target_label
+        value: Type
+      - name: base_dir
+        value: /mount/output/counterfactuals_lung_types
+      - name: manipulation_levels
+        value: [0.06]
+      - name: pretrained_autoenc_name
+        value: pancancer_model
+      - name: pretrained_clf_name 
+        value: lung
+    mount:
+      - source: images/Pancancer-lung
+        target: images/Pancancer-lung
+      - source: features/Pancancer
+        target: features/Pancancer
+      - source: Pancancer_clini.xlsx
+        target: Pancancer_clini.xlsx
