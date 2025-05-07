@@ -1,13 +1,23 @@
 from __future__ import annotations
 
+import copy
+import json
 from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal, Self
 
 import yaml
-from pydantic import BaseModel, ConfigDict, Field, create_model, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    computed_field,
+    create_model,
+    field_serializer,
+    model_validator,
+)
 
-from toolarena.utils import substitute_env_vars
+from toolarena.utils import TASKS_DIR, substitute_env_vars
 
 if TYPE_CHECKING:
     from toolarena.run import ToolImplementation
@@ -34,6 +44,14 @@ class ArgumentDefinition(BaseModel):
 class ArgumentValue(BaseModel):
     name: str
     value: ArgumentType
+
+    @field_serializer("value")
+    def serialize_value(self, value: ArgumentType) -> str:
+        return json.dumps(value)
+
+    @classmethod
+    def from_dict(cls, d: dict) -> Self:
+        return cls(name=d["name"], value=json.loads(d["value"]))
 
 
 class Mount(BaseModel):
@@ -86,6 +104,23 @@ class Repository(BaseModel):
         return {k: substitute_env_vars(v, env) for k, v in self.env.items()}
 
 
+class PaperInfo(BaseModel):
+    id: str
+
+    @computed_field
+    @property
+    def bibtex(self) -> str:
+        from bibtexparser import parse_file
+
+        bibtex_database = parse_file(TASKS_DIR / "papers.bib")
+        return bibtex_database.entries_dict[self.id].raw
+
+    @computed_field
+    @property
+    def url(self) -> str:
+        return yaml.safe_load(open(TASKS_DIR / "papers.yaml", "r"))[self.id]
+
+
 class ToolDefinition(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
@@ -126,9 +161,26 @@ class ToolDefinition(BaseModel):
             self._validate_invocation(invocation)
         return self
 
+    @computed_field
+    @property
+    def papers_info(self) -> Sequence[PaperInfo]:
+        return [PaperInfo(id=paper_id) for paper_id in self.papers]
+
     @classmethod
     def from_yaml(cls, path: Path | str) -> Self:
         return cls(**yaml.safe_load(open(path, "r")))
+
+    @classmethod
+    def from_dict(cls, d: dict) -> Self:
+        d = copy.deepcopy(d)
+        for invocation in (d["example"], *d["test_invocations"]):
+            invocation["arguments"] = [
+                ArgumentValue.from_dict(arg) for arg in invocation["arguments"]
+            ]
+        return cls(**d)
+
+    def to_dict(self) -> dict:
+        return self.model_dump(mode="json")
 
     def _arg_str(self) -> str:
         return ", ".join(

@@ -1,0 +1,54 @@
+name: totalsegmentator_segment_liver
+repo:
+  name: TotalSegmentator
+  url: "https://github.com/wasserth/TotalSegmentator"
+  commit: 5b1a4f0
+papers: [wasserthal2023totalsegmentator]
+category: radiology
+requires: cuda
+description: Segment the liver vessels from the input CT scan(s) and save the result as a .nii.gz file. In the output segmentation, liver vessel voxels must have the value 1, and all other voxels must be 0.
+arguments:
+  - name: ct_input_path
+    description: Path to the input image in .nii.gz format
+    type: str
+  - name: segmentation_mask_output_path
+    description: Path to the output file (liver vessels segmentation mask) in .nii.gz format
+    type: str
+returns: []
+example:
+  arguments:
+    - name: ct_input_path
+      value: /mount/input/CRLM-CT-1040_0000.nii.gz
+    - name: segmentation_mask_output_path
+      value: /mount/output/CRLM-CT-1040_0000_seg_mask.nii.gz
+  mount:
+    - source: CRLM-CT-1040_0000.nii.gz
+      target: CRLM-CT-1040_0000.nii.gz
+test_invocations:
+  - name: CRLM-CT-1085
+    arguments:
+      - name: ct_input_path
+        value: /mount/input/CRLM-CT-1085_0000.nii.gz
+      - name: segmentation_mask_output_path
+        value: /mount/output/CRLM-CT-1085_0000_seg_mask.nii.gz
+    mount:
+      - source: CRLM-CT-1085_0000.nii.gz
+        target: CRLM-CT-1085_0000.nii.gz
+  - name: CRLM-CT-1161
+    arguments:
+      - name: ct_input_path
+        value: /mount/input/CRLM-CT-1161_0000.nii.gz
+      - name: segmentation_mask_output_path
+        value: /mount/output/CRLM-CT-1161_0000_seg_mask.nii.gz
+    mount:
+      - source: CRLM-CT-1161_0000.nii.gz
+        target: CRLM-CT-1161_0000.nii.gz
+  - name: CRLM-CT-1094
+    arguments:
+      - name: ct_input_path
+        value: /mount/input/CRLM-CT-1094_0000.nii.gz
+      - name: segmentation_mask_output_path
+        value: /mount/output/CRLM-CT-1094_0000_seg_mask.nii.gz
+    mount:
+      - source: CRLM-CT-1094_0000.nii.gz
+        target: CRLM-CT-1094_0000.nii.gz

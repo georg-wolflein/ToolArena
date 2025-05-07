@@ -5,7 +5,7 @@ repo:
   commit: bf5b0c5
   env:
     OPENAI_API_KEY: "${env:OPENAI_API_KEY}"
-papers: [zou2024textgrad]
+papers: [yuksekgonul2024textgrad]
 category: pathology
 description: >
   Optimize answers to multiple-choice medical questions using TextGrad.

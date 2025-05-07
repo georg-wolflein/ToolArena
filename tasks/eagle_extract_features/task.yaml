@@ -1,0 +1,85 @@
+name: eagle_extract_features # Name of the task. Should correspond to the name of the folder.
+repo:
+  name: EAGLE # Name of the repository.
+  url: "https://github.com/KatherLab/EAGLE" # URL of the repository.
+  branch: simple_feature_extraction # Branch of the repository (optional)
+  env: {}
+papers: [neidlinger2025eagle] # List of papers that this task is based on. Papers are specified by their IDs in the papers.bib file.
+category: pathology # Category of the task.
+requires: cuda # If your task requires a GPU, change this to "cuda".
+description: Perform slide-level feature extraction using EAGLE, given tile-level features. # Description of the task. This should be 1-3 sentences in length, explaining to the LLM what this tool should do.
+arguments:
+  - name: output_dir
+    description: Path to the output folder where the features will be saved
+    type: str
+  - name: feature_dir_weighting
+    description: Path to the input folder containing the tile features to create the weighting (chief-CTP). Files are in *.h5 format, one file per slide.
+    type: str
+  - name: feature_dir_aggregation
+    description: Path to the input folder containing the tile features that will be aggregated (Virchow2). Files are in *.h5 format, one file per slide.
+    type: str
+returns:
+  - name: num_processed_slides
+    description: The number of slides that were processed 
+    type: int
+example:
+  # Below, we define an example invocation of the task, i.e. a specific input to the tool.
+  # This section is required, and it consists of "arguments" and "mount" (see below).
+  arguments:
+    - name: output_dir
+      value: /mount/output/cobra_features-crc
+    - name: feature_dir_aggregation
+      value: /mount/input/TCGA-CRC-Virchow2-features
+    - name: feature_dir_weighting
+      value: /mount/input/TCGA-CRC-ChiefCTP-features
+  mount:
+    - source: TCGA-CRC-Virchow2-features
+      target: TCGA-CRC-Virchow2-features
+    - source: TCGA-CRC-ChiefCTP-features
+      target: TCGA-CRC-ChiefCTP-features
+test_invocations:
+  # Below, we define test invocations for the task.
+  # Each test invocation is a dictionary with the keys "name", "arguments", and "mount", like the example invocation above (with the addition of the "name" key).
+  # The test invocations can be used in the unit tests to check that the task is working as expected.
+  # Below, we define 3 test invocations for the task, named "tif", "png", and "jpg". 
+  # It is recommended that you define at least 3 test invocations (of course, you can choose any names you want).
+  - name: crc
+    arguments:
+      - name: output_dir
+        value: /mount/output/cobra_features-crc
+      - name: feature_dir_aggregation
+        value: /mount/input/TCGA-CRC-Virchow2-features
+      - name: feature_dir_weighting
+        value: /mount/input/TCGA-CRC-ChiefCTP-features
+    mount:
+      - source: TCGA-CRC-Virchow2-features
+        target: TCGA-CRC-Virchow2-features
+      - source: TCGA-CRC-ChiefCTP-features
+        target: TCGA-CRC-ChiefCTP-features
+  - name: brca
+    arguments:
+      - name: output_dir
+        value: /mount/output/cobra_features-brca
+      - name: feature_dir_aggregation
+        value: /mount/input/TCGA-BRCA-Virchow2-features
+      - name: feature_dir_weighting
+        value: /mount/input/TCGA-BRCA-ChiefCTP-features
+    mount:
+      - source: TCGA-BRCA-Virchow2-features
+        target: TCGA-BRCA-Virchow2-features
+      - source: TCGA-BRCA-ChiefCTP-features
+        target: TCGA-BRCA-ChiefCTP-features
+  - name: brca-single
+    arguments:
+      - name: output_dir
+        value: /mount/output/cobra_features-brca-single
+      - name: feature_dir_aggregation
+        value: /mount/input/TCGA-BRCA-Virchow2-features
+      - name: feature_dir_weighting
+        value: /mount/input/TCGA-BRCA-ChiefCTP-features
+    mount:
+      - source: TCGA-BRCA-Virchow2-features/TCGA-3C-AALJ-01Z-00-DX2.62DFE56B-B84C-40F9-9625-FCB55767B70D.h5
+        target: TCGA-BRCA-Virchow2-features/TCGA-3C-AALJ-01Z-00-DX2.62DFE56B-B84C-40F9-9625-FCB55767B70D.h5
+      - source: TCGA-BRCA-ChiefCTP-features/TCGA-3C-AALJ-01Z-00-DX2.62DFE56B-B84C-40F9-9625-FCB55767B70D.h5
+        target: TCGA-BRCA-ChiefCTP-features/TCGA-3C-AALJ-01Z-00-DX2.62DFE56B-B84C-40F9-9625-FCB55767B70D.h5
+

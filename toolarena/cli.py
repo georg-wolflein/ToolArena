@@ -1,3 +1,5 @@
+import os
+import shlex
 import shutil
 from pathlib import Path
 from typing import Annotated
@@ -10,7 +12,8 @@ from rich.text import Text
 
 from toolarena.definition import ToolDefinition
 from toolarena.run import ToolImplementation, ToolRunner
-from toolarena.utils import RUNS_DIR, TASKS_DIR, TEMPLATE_DIR
+from toolarena.runtime import get_docker
+from toolarena.utils import RUNS_DIR, TASKS_DIR, TEMPLATE_DIR, run_and_stream_container
 
 app = typer.Typer()
 
@@ -227,3 +230,72 @@ You can [blue link=https://code.visualstudio.com/docs/devcontainers/attach-conta
             title=f"""Container [bold]{client.name}[/bold] [green]started[/green]""",
         )
     )
+
+
+@app.command()
+def download(
+    name: Annotated[str | None, typer.Argument(help="The name of the tool")] = None,
+    force: Annotated[
+        bool, typer.Option(help="Force download even if already downloaded")
+    ] = False,
+) -> None:
+    """Download data files for a tool."""
+    # If no name is provided, download data for all tools
+    if not name:
+        for i, task in enumerate(tasks := list(TASKS_DIR.glob("*/task.yaml"))):
+            name = task.parent.name
+            print(f"Task {i + 1}/{len(tasks)}: [bold]{name}[/bold]")
+            download(name, force=force)
+        return
+
+    # Download data for the given tool
+    data_dir = TASKS_DIR / name / "data"
+    download_script = data_dir / "download.sh"
+    if not download_script.exists():
+        print(
+            f"[yellow]Skipped[/yellow] downloading data for [bold]{name}[/bold] (nothing to download)"
+        )
+        return
+    if data_dir.joinpath(".downloaded").exists() and not force:
+        print(
+            f"[yellow]Skipped[/yellow] downloading data for [bold]{name}[/bold] (already downloaded)"
+        )
+        return
+
+    print(f"Downloading data for [bold]{name}[/bold]...")
+    repo_dir = TASKS_DIR.parent
+    container_repo_dir = Path("/repo")
+    container_data_dir = container_repo_dir / data_dir.relative_to(repo_dir)
+    command = (
+        f"git config --global --add safe.directory {shlex.quote(str(container_repo_dir))} && "
+        f"cd {shlex.quote(str(container_repo_dir))} && "
+        f"git clean -fdX {shlex.quote(str(container_data_dir))} && "
+        f"cd {shlex.quote(str(container_data_dir))} && "
+        f"{shlex.quote(str(container_data_dir / 'download.sh'))} && "
+        f"chown -R {os.getuid()}:{os.getgid()} {shlex.quote(str(container_data_dir))} && "
+        f"touch {shlex.quote(str(container_data_dir / '.downloaded'))}"
+    )
+    print(f"Running [bold]{command}[/bold] in container...")
+    container = get_docker().containers.run(
+        name=f"toolarena-download-{name}",
+        image="ghcr.io/astral-sh/uv:bookworm",
+        command=f"/bin/bash -c {shlex.quote(command)}",
+        volumes={
+            str(repo_dir.resolve().absolute()): {
+                "bind": str(container_repo_dir),
+                "mode": "ro",
+            },
+            str(data_dir.resolve().absolute()): {
+                "bind": str(container_repo_dir / data_dir.relative_to(repo_dir)),
+                "mode": "rw",
+            },
+        },
+        stdout=True,
+        stderr=True,
+        detach=True,
+        tty=False,
+        remove=True,
+    )
+    for chunk in run_and_stream_container(container):
+        print(chunk, end="")
+    print(f"[green]Downloaded[/green] data for [bold]{name}[/bold]")

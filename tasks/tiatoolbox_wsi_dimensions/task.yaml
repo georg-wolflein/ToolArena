@@ -1,0 +1,74 @@
+name: tiatoolbox_wsi_dimensions
+repo:
+  name: tiatoolbox
+  url: "https://github.com/TissueImageAnalytics/tiatoolbox"
+  commit: 7ba7394
+papers: [pocock2022tiatoolbox]
+category: pathology
+requires: cpu
+description: Determine the pixel dimensions for every whole slide image (WSI) in `input_dir` using TIAToolbox.
+arguments:
+  - name: input_dir
+    description: Path to the folder that contains the WSIs
+    type: str
+  - name: include_pyramid
+    type: bool
+    default: True
+    description: Whether to include every pyramid level instead of only the baseline dimensions
+returns:
+  - name: dimensions
+    description: >-
+      Dimensions of the WSI (optionally with of without full pyramid values) as a dict of 
+      {slide_filename: {"baseline": [width, height], "levels": [[width, height], ...]}}, where 
+      `baseline` is the dimensions of the WSI at the highest resolution and `levels` is a list of 
+      dimensions for each pyramid level. If `include_pyramid` is `False`, only the `baseline` 
+      dimensions are included.
+    type: dict
+example:
+  arguments:
+    - name: input_dir
+      value: /mount/input/wsis
+    - name: include_pyramid
+      value: True
+  mount:
+    - source: wsis
+      target: wsis
+test_invocations:
+  - name: single_wsi_baseline
+    arguments:
+    - name: input_dir
+      value: /mount/input/wsis
+    - name: include_pyramid
+      value: False
+    mount:
+      - source: wsis/TCGA-DT-5265-01Z-00-DX1.563f09af-8bbe-45cd-9c6d-85a96255e67f.svs
+        target: wsis/TCGA-DT-5265-01Z-00-DX1.563f09af-8bbe-45cd-9c6d-85a96255e67f.svs
+  - name: single_wsi_full_pyramid
+    arguments:
+    - name: input_dir
+      value: /mount/input/wsis
+    - name: include_pyramid
+      value: True
+    mount:
+      - source: wsis/TCGA-DT-5265-01Z-00-DX1.563f09af-8bbe-45cd-9c6d-85a96255e67f.svs
+        target: wsis/TCGA-DT-5265-01Z-00-DX1.563f09af-8bbe-45cd-9c6d-85a96255e67f.svs
+  - name: two_wsi_full_pyramid
+    arguments:
+    - name: input_dir
+      value: /mount/input/wsis
+    - name: include_pyramid
+      value: True
+    mount:
+      - source: wsis/TCGA-AG-A011-01Z-00-DX1.155A4093-5EC6-4D38-8CE1-24C045DF0CD8.svs
+        target: wsis/TCGA-AG-A011-01Z-00-DX1.155A4093-5EC6-4D38-8CE1-24C045DF0CD8.svs
+      - source: wsis/TCGA-EI-6881-01Z-00-DX1.5cfa2929-4374-4166-b110-39ab7d3de7cd.svs
+        target: wsis/TCGA-EI-6881-01Z-00-DX1.5cfa2929-4374-4166-b110-39ab7d3de7cd.svs
+  - name: full_dir_baseline
+    arguments:
+    - name: input_dir
+      value: /mount/input/wsis
+    - name: include_pyramid
+      value: False
+    mount:
+      - source: wsis
+        target: wsis

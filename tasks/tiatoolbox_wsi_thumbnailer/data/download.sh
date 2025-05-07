@@ -6,8 +6,8 @@ set -e
 mkdir -p wsis
 
 # Download large files required for the task
-tail -n +2 tcga_read_gdc_manifest.2025-04-26.151110_small_batch.txt | \
-while IFS=$'\t' read -r uuid filename md5 size state; do
-    echo "Downloading ${filename}..."
-    wget -c "https://api.gdc.cancer.gov/data/${uuid}" -O "wsis/${filename}"
-done
+manifest="tcga_read_gdc_manifest.2025-04-26.151110_small_batch.txt"
+mkdir -p wsis.download
+uvx --from git+https://github.com/NCI-GDC/gdc-client gdc-client download --manifest $manifest --dir wsis.download
+mv wsis.download/*/*.svs wsis
+rm -rf wsis.download

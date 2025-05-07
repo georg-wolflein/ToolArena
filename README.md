@@ -58,12 +58,18 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for a full guide on how to contribute a n
 Create a `.env` file in the repository’s root directory with at least these variables:
 ```bash
 CUDA_VISIBLE_DEVICES=0  # If you have a GPU, set the device ID here; otherwise, you can leave it blank
-HF_TOKEN=hf_abcdefghijklmnopqrstuvwxyz0123456789  # Replace with your Hugging Face token
+HF_TOKEN=hf_...  # Replace with your HuggingFace token
+OPENAI_API_KEY=sk-...  # Replace with your OpenAI API key
 ```
 You will need to **request access** to the following HuggingFace repositories, which are required by some of the tasks:
 - [MahmoodLab/UNI](https://huggingface.co/MahmoodLab/UNI) (for [`uni_extract_features`](tasks/uni_extract_features/))
 - [MahmoodLab/CONCH](https://huggingface.co/MahmoodLab/CONCH) (for [`conch_extract_features`](tasks/conch_extract_features/))
 - [xiangjx/musk](https://huggingface.co/xiangjx/musk) (for [`musk_extract_features`](tasks/musk_extract_features/))
+- [KatherLab/COBRA](https://huggingface.co/KatherLab/COBRA) (for [`cobra_extract_features`](tasks/cobra_extract_features/) and [`cobra_heatmaps`](tasks/cobra_heatmaps))
+- [pixas/MedSSS_Policy](https://huggingface.co/pixas/MedSSS_Policy) (for [`medsss_generate`](tasks/medsss_generate/))
+- [YukunZhou/RETFound_mae_natureCFP](https://huggingface.co/YukunZhou/RETFound_mae_natureCFP) (for [`retfound_feature_vector`](tasks/retfound_feature_vector/))
+
+An OpenAI API key is required for the [`textgrad_medical_qa_optimize`](tasks/textgrad_medical_qa_optimize) task.
 
 ## Tasks
 All tasks live under the [`tasks/`](tasks/) directory. Each contains:
@@ -77,6 +83,15 @@ All tasks live under the [`tasks/`](tasks/) directory. Each contains:
   - An **installation script** (`install.sh`) that clones the repository and installs necessary dependencies.
   - A **Python implementation** (`implementation.py`) that provides a reference function for the given task.
 
+
+## Downloading external data
+Some tasks require large external data files as input (e.g. images, datasets, etc.).
+Each task may specify a `data/download.sh` script, which downloads all required external data from publicly available repositories.
+While may execute these download scripts yourself, ToolArena provides a convenient command to download all data for you:
+```bash
+toolarena download
+```
+If you want to download the data for one specific task, simply run `toolarena download <TASK_NAME>` instead.
 
 ## Running a candidate implementation
 A candidate implementation must have:

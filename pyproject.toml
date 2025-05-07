@@ -8,6 +8,7 @@ description = "Benchmark for LLM tool creation"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "bibtexparser>=2.0.0b8",
     "datasets>=3.5.0",
     "docker>=7.1.0",
     "fastapi>=0.115.11",
@@ -55,6 +56,7 @@ dev = [
 ]
 benchmark = [
     "h5py>=3.13.0",
+    "nibabel>=5.3.2",
 ]
 
 [tool.ruff.lint.per-file-ignores]
