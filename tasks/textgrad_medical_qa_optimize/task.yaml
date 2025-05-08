@@ -6,7 +6,7 @@ repo:
   env:
     OPENAI_API_KEY: "${env:OPENAI_API_KEY}"
 papers: [yuksekgonul2024textgrad]
-category: pathology
+category: llms
 description: >
   Optimize answers to multiple-choice medical questions using TextGrad.
   Each question is improved at test-time through textual gradients,
