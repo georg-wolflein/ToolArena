@@ -68,6 +68,7 @@ You will need to **request access** to the following HuggingFace repositories, w
 - [KatherLab/COBRA](https://huggingface.co/KatherLab/COBRA) (for [`cobra_extract_features`](tasks/cobra_extract_features/) and [`cobra_heatmaps`](tasks/cobra_heatmaps))
 - [pixas/MedSSS_Policy](https://huggingface.co/pixas/MedSSS_Policy) (for [`medsss_generate`](tasks/medsss_generate/))
 - [YukunZhou/RETFound_mae_natureCFP](https://huggingface.co/YukunZhou/RETFound_mae_natureCFP) (for [`retfound_feature_vector`](tasks/retfound_feature_vector/))
+- [KatherLab/MoPaDi](https://huggingface.co/KatherLab/MoPaDi) (for [`mopadi_generate_counterfactuals`](tasks/mopadi_generate_counterfactuals/))
 
 An OpenAI API key is required for the [`textgrad_medical_qa_optimize`](tasks/textgrad_medical_qa_optimize) task.
 
