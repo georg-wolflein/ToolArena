@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import json
 from collections.abc import Mapping, Sequence
+from functools import cached_property
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal, Self
 
@@ -106,19 +107,29 @@ class Repository(BaseModel):
 
 class PaperInfo(BaseModel):
     id: str
+    bibtex: str
+    url: str
 
-    @computed_field
-    @property
-    def bibtex(self) -> str:
+    @classmethod
+    def load(
+        cls,
+        id: str,
+        papers_bibtex: Path | str = TASKS_DIR / "papers.bib",
+        papers_yaml: Path | str = TASKS_DIR / "papers.yaml",
+    ) -> Self:
         from bibtexparser import parse_file
 
-        bibtex_database = parse_file(TASKS_DIR / "papers.bib")
-        return bibtex_database.entries_dict[self.id].raw
+        bibtex_database = parse_file(papers_bibtex)
+        try:
+            bibtex = bibtex_database.entries_dict[id].raw
+        except KeyError:
+            raise ValueError(f"Paper {id} not found in {papers_bibtex}")
+        try:
+            url = yaml.safe_load(open(papers_yaml, "r"))[id]
+        except KeyError:
+            raise ValueError(f"Paper {id} not found in {papers_yaml}")
 
-    @computed_field
-    @property
-    def url(self) -> str:
-        return yaml.safe_load(open(TASKS_DIR / "papers.yaml", "r"))[self.id]
+        return cls(id=id, bibtex=bibtex, url=url)
 
 
 class ToolDefinition(BaseModel):
@@ -161,10 +172,13 @@ class ToolDefinition(BaseModel):
             self._validate_invocation(invocation)
         return self
 
-    @computed_field
-    @property
-    def papers_info(self) -> Sequence[PaperInfo]:
-        return [PaperInfo(id=paper_id) for paper_id in self.papers]
+    def get_papers_info(
+        self, papers_bibtex: str, papers_yaml: str
+    ) -> Sequence[PaperInfo]:
+        return [
+            PaperInfo.load(paper_id, papers_bibtex, papers_yaml)
+            for paper_id in self.papers
+        ]
 
     @classmethod
     def from_yaml(cls, path: Path | str) -> Self:
