@@ -3,6 +3,8 @@
 ToolArena is a **benchmark** for evaluating how well Large Language Model (LLM) agents can create "tools" from GitHub repositories. 
 Each *tool* (or *task*) corresponds to a Python function with defined inputs and outputs, wrapped in a containerised environment for reproducibility and testability.
 
+[![Dataset](https://img.shields.io/badge/Dataset-gray?logo=huggingface)](https://huggingface.co/datasets/KatherLab/ToolArena)
+
 ## Overview
 ToolArena contains multiple tasks under the [`tasks/`](tasks/) directory. Each task is:
 - **Self-contained**: it has its own `task.yaml` describing its name, inputs, outputs, example invocation, and test invocations.
