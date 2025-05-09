@@ -24,6 +24,7 @@ if __name__ == "__main__":
         sorted(
             (load_tool_definition_dict(f) for f in DEFINITIONS_DIR.glob("*/task.yaml")),
             key=lambda definition: definition["name"],
-        )
+        ),
+        split="evaluation",
     )
     ds.push_to_hub(HF_REPO_ID, commit_message=HF_COMMIT_MESSAGE)
