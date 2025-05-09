@@ -1,0 +1,55 @@
+name: cyvcf2_mean_allele_len 
+repo:
+  name: cyvcf2
+  url: "https://github.com/brentp/cyvcf2" 
+  commit: 541ab16 
+  branch: main 
+  env: []
+papers: [pedersen2017cyvcf2] 
+category: bioinformatics
+requires: cpu 
+description: Parse through VCF file containing detected sequence variants to identify mean allele length for the variants using cyvcf2 python library.
+arguments:
+  - name: input_vcf
+    description: Path to the input VCF fil
+    type: str  
+returns:
+  - name: mean_allele_len
+    description: The mean allele length of all the variants in the input VCF file.  
+    type: int
+example:
+  arguments:
+    - name: input_vcf
+      value: /mount/input/SRR2058984_zc.vcf
+  mount:
+    - source: SRR2058984_zc.vcf
+      target: SRR2058984_zc.vcf
+test_invocations:
+  - name: SRR2058985
+    arguments:
+      - name: input_vcf
+        value: /mount/input/SRR2058985_zc.vcf
+    mount:
+      - source: SRR2058985_zc.vcf
+        target: SRR2058985_zc.vcf
+  - name: SRR2058987
+    arguments:
+      - name: input_vcf
+        value: /mount/input/SRR2058987_zc.vcf
+    mount:
+      - source: SRR2058987_zc.vcf
+        target: SRR2058987_zc.vcf
+  - name: SRR2058988
+    arguments:
+      - name: input_vcf
+        value: /mount/input/SRR2058988_zc.vcf
+    mount:
+      - source: SRR2058988_zc.vcf
+        target: SRR2058988_zc.vcf
+  - name: SRR2058989
+    arguments:
+      - name: input_vcf
+        value: /mount/input/SRR2058989_zc.vcf
+    mount:
+      - source: SRR2058989_zc.vcf
+        target: SRR2058989_zc.vcf
