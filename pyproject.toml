@@ -49,6 +49,7 @@ pythonpath = ["."]
 [dependency-groups]
 dev = [
     "ipykernel>=6.29.5",
+    "matplotlib>=3.10.3",
     "pillow>=11.2.1",
     "pytest-asyncio>=0.26.0",
     "types-docker>=7.1.0.20241229",

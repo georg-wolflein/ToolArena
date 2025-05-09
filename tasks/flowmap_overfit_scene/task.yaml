@@ -4,7 +4,7 @@ repo:
   url: "https://github.com/dcharatan/flowmap"
   commit: 578a515
 papers: [smith2024flowmap]
-category: 3d_vision
+category: misc  # 3d_vision
 requires: cuda
 description: Overfit FlowMap on an input scene to determine camera extrinsics for each frame in the scene.
 arguments:

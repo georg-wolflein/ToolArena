@@ -8,7 +8,7 @@ repo:
 papers: [zigutyte2024mopadi]
 category: pathology
 requires: cuda
-description: Generate counterfactual explanations for the top 3 tiles per patient by manipulating them with a specific amplitude, such that the predicted class of each counterfactual image flips to the opposite class (i.e., the predicted output for the opposite class exceeds 0.9), while avoiding excessive overmanipulation. Use a pretrained diffusion autoencoder according to the cancer type, combined with a corresponding MIL classifier trained to distinguish biologically meaningful histological patterns. You will be provided with the path to the folder containing images, the clinical table with each patient’s target label values, and the folder containing pre-extracted features
+description: Generate counterfactual explanations for the top 3 tiles per patient by manipulating them with a specific amplitude, such that the predicted class of each counterfactual image flips to the opposite class (i.e., the predicted output for the opposite class exceeds 0.9), while avoiding excessive overmanipulation. Use a pretrained diffusion autoencoder according to the cancer type, combined with a corresponding MIL classifier trained to distinguish biologically meaningful histological patterns. You will be provided with the path to the folder containing images, the clinical table with each patient's target label values, and the folder containing pre-extracted features
 arguments:
   - name: images_dir
     description: Path to the folder containing patient subfolders with image patches

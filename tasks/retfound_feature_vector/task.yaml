@@ -6,7 +6,7 @@ repo:
   env:
     HF_TOKEN: "${env:HF_TOKEN}"  # required for downloading models
 papers: [zhou2023retfound]
-category: imaging
+category: misc  # imaging
 requires: cuda
 description: >-
   Extract the latent feature vector for the given retinal image using the RETFound pretrained RETFound_mae_natureCFP model.

@@ -4,7 +4,7 @@ repo:
   url: "https://github.com/PriorLabs/TabPFN"
   commit: e8744e4
 papers: [hollmann2025tabpfn]
-category: tabular
+category: misc  # tabular
 requires: cpu
 description: Train a predictor using TabPFN on a tabular dataset. Evaluate the predictor on the test set. Train on CPU.
 arguments:
