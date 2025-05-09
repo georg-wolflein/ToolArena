@@ -59,6 +59,11 @@ class Mount(BaseModel):
     target: str
 
 
+class EnvironmentVariable(BaseModel):
+    name: str
+    value: str
+
+
 class ToolInvocation(BaseModel):
     name: str
     arguments: Sequence[ArgumentValue]
@@ -74,7 +79,7 @@ class Repository(BaseModel):
     url: str
     branch: str | None = None
     commit: str | None = None
-    env: Mapping[str, str] = Field(default_factory=dict)
+    env: Sequence[EnvironmentVariable] = Field(default_factory=list)
 
     @property
     def name_without_owner(self) -> str:
@@ -101,7 +106,7 @@ class Repository(BaseModel):
         return cmd
 
     def resolve_env(self, env: Mapping[str, str] | None = None) -> Mapping[str, str]:
-        return {k: substitute_env_vars(v, env) for k, v in self.env.items()}
+        return {v.name: substitute_env_vars(v.value, env) for v in self.env}
 
 
 class PaperInfo(BaseModel):

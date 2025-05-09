@@ -4,7 +4,8 @@ repo:
   url: "https://github.com/KatherLab/mopadi"
   commit: 4e76820
   env:
-    HF_TOKEN: "${env:HF_TOKEN}"
+    - name: HF_TOKEN
+      value: "${env:HF_TOKEN}"
 papers: [zigutyte2024mopadi]
 category: pathology
 requires: cuda

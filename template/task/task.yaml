@@ -6,9 +6,13 @@ repo:
   # branch: main # Branch of the repository (optional)
   env:
     # Here, you can specify environment variables that should be available for installing the repository or running the task.
-    # The format is key: value, where value is a string that can include variables from the local environment.
-    # You may also leave this empty if the repository does not require any tokens/secrets.
-    HF_TOKEN: "${env:HF_TOKEN}"  # Example environment variable that sets HF_TOKEN to the local environment variable HF_TOKEN.
+    # The environment variables are specified as a list of dictionaries, where each dictionary contains the keys "name" and "value".
+    # The value is a string that can include variables from the local environment.
+    # You may also leave this empty (set env to an empty list using `env: []`) if the repository does not require any tokens/secrets.
+    - name: HF_TOKEN           # Name of the environment variable.
+      value: "${env:HF_TOKEN}" # Value of the environment variable. Here, we set HF_TOKEN to the local environment variable HF_TOKEN.
+    - name: SOME_OTHER_VARIABLE
+      value: "abc"
 papers: [lu2024conch] # List of papers that this task is based on. Papers are specified by their IDs in the papers.bib file.
 category: pathology # Category of the task.
 requires: cpu # If your task requires a GPU, change this to "cuda".

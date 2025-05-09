@@ -4,7 +4,8 @@ repo:
   url: "https://github.com/mahmoodlab/UNI"
   commit: 42715ef
   env:
-    HF_TOKEN: "${env:HF_TOKEN}"  # required for downloading models
+    - name: HF_TOKEN
+      value: "${env:HF_TOKEN}"
 papers: [chen2024uni]
 category: pathology
 requires: cuda

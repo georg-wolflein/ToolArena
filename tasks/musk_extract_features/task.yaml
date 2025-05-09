@@ -4,7 +4,8 @@ repo:
   url: "https://github.com/lilab-stanford/MUSK"
   commit: e1699c2
   env:
-    HF_TOKEN: "${env:HF_TOKEN}"  # required for downloading models
+    - name: HF_TOKEN
+      value: "${env:HF_TOKEN}"
 papers: [xiang2025musk]
 category: pathology
 requires: cuda

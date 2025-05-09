@@ -3,7 +3,7 @@ repo:
   name: EAGLE # Name of the repository.
   url: "https://github.com/KatherLab/EAGLE" # URL of the repository.
   branch: simple_feature_extraction # Branch of the repository (optional)
-  env: {}
+  env: []
 papers: [neidlinger2025eagle] # List of papers that this task is based on. Papers are specified by their IDs in the papers.bib file.
 category: pathology # Category of the task.
 requires: cuda # If your task requires a GPU, change this to "cuda".

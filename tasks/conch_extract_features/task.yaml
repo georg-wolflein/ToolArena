@@ -4,7 +4,8 @@ repo:
   url: "https://github.com/mahmoodlab/CONCH"
   commit: 171f2be
   env:
-    HF_TOKEN: "${env:HF_TOKEN}"  # required for downloading models
+    - name: HF_TOKEN
+      value: "${env:HF_TOKEN}"
 papers: [lu2024conch]
 category: pathology
 requires: cuda

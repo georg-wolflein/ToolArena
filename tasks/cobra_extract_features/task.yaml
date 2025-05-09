@@ -6,10 +6,8 @@ repo:
   commit: null # Commit hash of the repository (optional, default is the latest commit). It is recommended to use a specific commit to ensure reproducibility.
   # branch: main # Branch of the repository (optional)
   env:
-    # Here, you can specify environment variables that should be available for installing the repository or running the task.
-    # The format is key: value, where value is a string that can include variables from the local environment.
-    # You may also leave this empty if the repository does not require any tokens/secrets.
-    HF_TOKEN: "${env:HF_TOKEN}"  # Example environment variable that sets HF_TOKEN to the local environment variable HF_TOKEN.
+    - name: HF_TOKEN
+      value: "${env:HF_TOKEN}"
 papers: [lenz2025cobra] # List of papers that this task is based on. Papers are specified by their IDs in the papers.bib file.
 category: pathology # Category of the task.
 description: Perform feature extraction on an input image using COBRA. The provided tile features have 1.0 mpp (224 microns / 224 px per patch).  # Description of the task. This should be 1-3 sentences in length, explaining to the LLM what this tool should do.

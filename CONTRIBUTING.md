@@ -141,7 +141,8 @@ At this point, you should at least define the following parts (the `task.yaml` f
      commit: abc123
      branch: main
      env:  # (optional)
-       MY_TOKEN: "${env:MY_TOKEN}"
+       - name: MY_TOKEN
+         value: "${env:MY_TOKEN}"
    ```
 4. **`arguments`**: inputs your tool expects.
 5. **`returns`**: outputs your tool produces.
@@ -155,7 +156,8 @@ For example, to set the environment variable `MY_ENV_VAR` to the value `"abc"`, 
 ```yaml
 repo:
   env:
-    MY_ENV_VAR: "abc"
+    - name: MY_ENV_VAR
+      value: "abc"
 ``` 
 The main use case for environment variables is to supply **secret tokens** such as API keys. For this, you may use a special syntax (`"${env:MY_TOKEN}"`) to insert environment variables from your *local environment*, defined in the top-level `.env` file.
 
@@ -172,7 +174,8 @@ Then you can tell ToolArena that the local `HF_TOKEN` environment variable defin
 > ```yaml
 > repo:
 >   env:
->     HF_TOKEN: "${env:HF_TOKEN}"
+>     - name: HF_TOKEN
+>       value: "${env:HF_TOKEN}"
 > ``` 
 
 

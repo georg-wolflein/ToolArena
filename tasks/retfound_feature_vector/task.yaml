@@ -4,7 +4,8 @@ repo:
   url: "https://github.com/rmaphoh/RETFound_MAE"
   commit: 897d71c
   env:
-    HF_TOKEN: "${env:HF_TOKEN}"  # required for downloading models
+    - name: HF_TOKEN
+      value: "${env:HF_TOKEN}"
 papers: [zhou2023retfound]
 category: misc  # imaging
 requires: cuda

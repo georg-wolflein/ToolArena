@@ -4,7 +4,8 @@ repo:
   url: "https://github.com/pixas/MedSSS"
   commit: ebbfd02
   env:
-    HF_TOKEN: "${env:HF_TOKEN}"  # required for downloading models
+    - name: HF_TOKEN
+      value: "${env:HF_TOKEN}"
 requires: cuda
 papers: [jiang2025medsss]
 category: llms
