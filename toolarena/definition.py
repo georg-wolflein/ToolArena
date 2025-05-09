@@ -3,7 +3,6 @@ from __future__ import annotations
 import copy
 import json
 from collections.abc import Mapping, Sequence
-from functools import cached_property
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal, Self
 
@@ -12,6 +11,7 @@ from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
+    computed_field,
     create_model,
     field_serializer,
     model_validator,
@@ -85,6 +85,8 @@ class Repository(BaseModel):
     def name_without_owner(self) -> str:
         return self.name.split("/")[-1]
 
+    @computed_field
+    @property
     def info(self) -> str:
         s = f"{self.name} from {self.url}"
         if self.commit:
@@ -214,6 +216,7 @@ class ToolDefinition(BaseModel):
 }}"""
         return "empty dict"
 
+    @computed_field
     @property
     def python_signature(self) -> str:
         indent = " " * 4
@@ -229,6 +232,7 @@ class ToolDefinition(BaseModel):
 {indent}\"\"\"
 """
 
+    @computed_field
     @property
     def xml_summary(self) -> str:
         return f"""<description>
