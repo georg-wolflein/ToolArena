@@ -12,9 +12,10 @@ from loguru import logger
 from rich import print as rich_print
 
 ROOT_DIR = Path(__file__).parent.parent
-RUNS_DIR = ROOT_DIR / "runs"
-TASKS_DIR = ROOT_DIR / "tasks"
 TEMPLATE_DIR = ROOT_DIR / "template"
+RUNS_DIR = Path(os.getenv("TOOLARENA_RUNS_DIR", ROOT_DIR / "runs"))
+DEFINITIONS_DIR = Path(os.getenv("TOOLARENA_DEFINITIONS_DIR", ROOT_DIR / "tasks"))
+DATA_DIR = Path(os.getenv("TOOLARENA_DATA_DIR", DEFINITIONS_DIR))
 
 EnvVarName: TypeAlias = str
 EnvVarValue: TypeAlias = str

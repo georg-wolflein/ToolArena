@@ -12,13 +12,12 @@ from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
-    computed_field,
     create_model,
     field_serializer,
     model_validator,
 )
 
-from toolarena.utils import TASKS_DIR, substitute_env_vars
+from toolarena.utils import DEFINITIONS_DIR, substitute_env_vars
 
 if TYPE_CHECKING:
     from toolarena.run import ToolImplementation
@@ -114,8 +113,8 @@ class PaperInfo(BaseModel):
     def load(
         cls,
         id: str,
-        papers_bibtex: Path | str = TASKS_DIR / "papers.bib",
-        papers_yaml: Path | str = TASKS_DIR / "papers.yaml",
+        papers_bibtex: Path | str = DEFINITIONS_DIR / "papers.bib",
+        papers_yaml: Path | str = DEFINITIONS_DIR / "papers.yaml",
     ) -> Self:
         from bibtexparser import parse_file
 

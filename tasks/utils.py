@@ -12,7 +12,7 @@ from toolarena import (
     ToolRunner,
     ToolRunResult,
 )
-from toolarena.utils import TASKS_DIR
+from toolarena.utils import DATA_DIR, DEFINITIONS_DIR
 
 type ToolFixture = Callable[[ToolInvocation], ToolRunResult]
 type InvocationFixture = Callable[[ToolFixture], ToolRunResult]
@@ -30,9 +30,9 @@ def _invocation_fixture(
         candidate_impl_dir: Path, request: pytest.FixtureRequest
     ) -> ToolRunResult:
         runner = ToolRunner.from_paths(
-            task_file=TASKS_DIR / tool_name / "task.yaml",
+            task_file=DEFINITIONS_DIR / tool_name / "task.yaml",
             invocation=invocation,
-            data_dir=TASKS_DIR / tool_name / "data",
+            data_dir=DATA_DIR / tool_name / "data",
             install_script=candidate_impl_dir / tool_name / "install.sh",
             code_implementation=candidate_impl_dir / tool_name / "implementation.py",
         )
@@ -78,7 +78,7 @@ def parametrize_invocation(
 def _get_fixtures(tool_name: str) -> Mapping[str, ToolFixture | InvocationFixture]:
     module = f"tasks.{tool_name}.tests"
     fixtures = {}
-    definition = ToolDefinition.from_yaml(TASKS_DIR / tool_name / "task.yaml")
+    definition = ToolDefinition.from_yaml(DEFINITIONS_DIR / tool_name / "task.yaml")
     for invocation in definition.test_invocations:
         fixtures[invocation.name] = _invocation_fixture(
             tool_name, invocation, module=module

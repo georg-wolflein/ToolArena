@@ -13,8 +13,17 @@ from rich.text import Text
 from toolarena.definition import ToolDefinition
 from toolarena.run import ToolImplementation, ToolRunner
 from toolarena.runtime import get_docker
-from toolarena.utils import RUNS_DIR, TASKS_DIR, TEMPLATE_DIR, run_and_stream_container
+from toolarena.utils import (
+    DATA_DIR,
+    DEFINITIONS_DIR,
+    ROOT_DIR,
+    RUNS_DIR,
+    TEMPLATE_DIR,
+    run_and_stream_container,
+)
 
+TESTS_DIR = DEFINITIONS_DIR
+REFERENCE_IMPLEMENTATIONS_DIR = DEFINITIONS_DIR
 app = typer.Typer()
 
 
@@ -23,14 +32,14 @@ def signature(
     name: Annotated[str, typer.Argument(help="The name of the tool")],
 ) -> None:
     """Print the signature of a tool."""
-    definition = ToolDefinition.from_yaml(TASKS_DIR / name / "task.yaml")
+    definition = ToolDefinition.from_yaml(DEFINITIONS_DIR / name / "task.yaml")
     print(definition.python_signature)
 
 
 @app.command()
 def init(name: Annotated[str, typer.Argument(help="The name of the tool")]) -> None:
     """Initialize a new tool."""
-    task_dir = TASKS_DIR / name
+    task_dir = DEFINITIONS_DIR / name
     if task_dir.exists():
         print(f"Task directory [bold]{task_dir}[/bold] already exists!")
         raise typer.Abort()
@@ -41,16 +50,15 @@ def init(name: Annotated[str, typer.Argument(help="The name of the tool")]) -> N
 @app.command()
 def generate(name: Annotated[str, typer.Argument(help="The name of the tool")]) -> None:
     """Generate the starting files for a new tool, after it has been initialized and the `task.yaml` file has been populated."""
-    task_dir = TASKS_DIR / name
-    definition_path = task_dir / "task.yaml"
+    definition_path = DEFINITIONS_DIR / name / "task.yaml"
     if not definition_path.exists():
         print(f"Task definition [bold]{definition_path}[/bold] does not exist")
         raise typer.Abort()
     definition = ToolDefinition.from_yaml(definition_path)
 
-    code_file = task_dir / "implementation.py"
-    install_script = task_dir / "install.sh"
-    tests_file = task_dir / "tests.py"
+    code_file = REFERENCE_IMPLEMENTATIONS_DIR / name / "implementation.py"
+    install_script = REFERENCE_IMPLEMENTATIONS_DIR / name / "install.sh"
+    tests_file = TESTS_DIR / name / "tests.py"
 
     if not code_file.exists():
         code_file.write_text(definition.python_signature)
@@ -102,9 +110,8 @@ def build(
     ] = None,
 ) -> ToolImplementation:
     """Build a tool."""
-    task_dir = TASKS_DIR / name
-    implementation_dir = implementation or task_dir
-    definition = ToolDefinition.from_yaml(task_dir / "task.yaml")
+    implementation_dir = implementation or (REFERENCE_IMPLEMENTATIONS_DIR / name)
+    definition = ToolDefinition.from_yaml(DEFINITIONS_DIR / name / "task.yaml")
     image = definition.build(
         install_script=implementation_dir.joinpath("install.sh").read_text(),
         code_implementation=implementation_dir.joinpath(
@@ -161,7 +168,7 @@ def run(
     for invocation in invocations:
         logger.info(f"Running {invocation.name} for {name}")
         result = tool.run(
-            invocation, data_dir=TASKS_DIR / name / "data", cache_root=cache
+            invocation, data_dir=DATA_DIR / name / "data", cache_root=cache
         )
         status_style = "green" if result.status == "success" else "red"
         print(
@@ -202,14 +209,13 @@ def debug(
     ] = "example",
 ) -> None:
     """Debug a tool."""
-    task_dir = TASKS_DIR / name
-    implementation_dir = implementation or task_dir
-    task_file = task_dir / "task.yaml"
+    implementation_dir = implementation or (REFERENCE_IMPLEMENTATIONS_DIR / name)
+    task_file = DEFINITIONS_DIR / name / "task.yaml"
     definition = ToolDefinition.from_yaml(task_file)
     runner = ToolRunner.from_paths(
         task_file=task_file,
         invocation=definition.get_invocation(invocation),
-        data_dir=task_dir / "data",
+        data_dir=DATA_DIR / name / "data",
         install_script=implementation_dir / "install.sh",
         code_implementation=implementation_dir / "implementation.py",
     )
@@ -242,14 +248,14 @@ def download(
     """Download data files for a tool."""
     # If no name is provided, download data for all tools
     if not name:
-        for i, task in enumerate(tasks := list(TASKS_DIR.glob("*/task.yaml"))):
+        for i, task in enumerate(tasks := list(DEFINITIONS_DIR.glob("*/task.yaml"))):
             name = task.parent.name
             print(f"Task {i + 1}/{len(tasks)}: [bold]{name}[/bold]")
             download(name, force=force)
         return
 
     # Download data for the given tool
-    data_dir = TASKS_DIR / name / "data"
+    data_dir = DATA_DIR / name / "data"
     download_script = data_dir / "download.sh"
     if not download_script.exists():
         print(
@@ -263,9 +269,8 @@ def download(
         return
 
     print(f"Downloading data for [bold]{name}[/bold]...")
-    repo_dir = TASKS_DIR.parent
     container_repo_dir = Path("/repo")
-    container_data_dir = container_repo_dir / data_dir.relative_to(repo_dir)
+    container_data_dir = container_repo_dir / data_dir.relative_to(ROOT_DIR)
     command = (
         f"git config --global --add safe.directory {shlex.quote(str(container_repo_dir))} && "
         f"cd {shlex.quote(str(container_repo_dir))} && "
@@ -281,12 +286,12 @@ def download(
         image="ghcr.io/astral-sh/uv:bookworm",
         command=f"/bin/bash -c {shlex.quote(command)}",
         volumes={
-            str(repo_dir.resolve().absolute()): {
+            str(ROOT_DIR.resolve().absolute()): {
                 "bind": str(container_repo_dir),
                 "mode": "ro",
             },
             str(data_dir.resolve().absolute()): {
-                "bind": str(container_repo_dir / data_dir.relative_to(repo_dir)),
+                "bind": str(container_repo_dir / data_dir.relative_to(ROOT_DIR)),
                 "mode": "rw",
             },
         },
